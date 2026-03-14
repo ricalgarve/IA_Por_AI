@@ -1,0 +1,8 @@
+requests
+feedparser
+feedsearch
+pygooglenews
+newspaper3k
+fastapi
+uvicorn
+jinja2

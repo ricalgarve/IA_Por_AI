@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>IA por AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1973f0",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+
+        function toggleNews(id) {
+            const desc = document.getElementById(`desc-${id}`);
+            const btnIcon = document.getElementById(`btn-icon-${id}`);
+            const sourceLink = document.getElementById(`source-link-${id}`);
+
+            if (desc.classList.contains('line-clamp-1')) {
+                // Expand
+                desc.classList.remove('line-clamp-1');
+                desc.classList.add('line-clamp-10');
+                btnIcon.textContent = 'expand_less';
+                sourceLink.classList.remove('hidden');
+                sourceLink.classList.add('flex');
+            } else {
+                // Collapse
+                desc.classList.remove('line-clamp-10');
+                desc.classList.add('line-clamp-1');
+                btnIcon.textContent = 'expand_more';
+                sourceLink.classList.add('hidden');
+                sourceLink.classList.remove('flex');
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .line-clamp-10 {
+            display: -webkit-box;
+            -webkit-line-clamp: 10;
+            line-clamp: 10;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Custom scrollbar for an elegant dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <div class="layout-container flex h-full grow flex-col">
+        <!-- Header -->
+        <header
+            class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 md:px-10 py-4">
+            <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="text-primary size-8">
+                        <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-extrabold tracking-tight dark:text-white uppercase italic">IA por AI</h2>
+                </div>
+                <div class="flex-1 max-w-md hidden md:block">
+                    <div class="relative group">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+                        <input
+                            class="w-full bg-slate-100 dark:bg-slate-800/50 border-none rounded-xl py-2.5 pl-11 pr-4 focus:ring-2 focus:ring-primary/50 text-sm transition-all outline-none"
+                            placeholder="Pesquisar manchetes..." type="text" />
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <button
+                        class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-all">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <div
+                        class="h-10 w-10 rounded-full border-2 border-primary/20 bg-slate-200 dark:bg-slate-700 overflow-hidden flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm">person</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto w-full px-6 py-12">
+            <!-- Featured Section (Hero) -->
+            <div
+                class="mb-16 py-12 border-y border-slate-100 dark:border-slate-800 relative overflow-hidden bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl">
+                <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
+                    style="background-image: radial-gradient(#1973f0 0.5px, transparent 0.5px); background-size: 24px 24px;">
+                </div>
+                <div class="relative px-8">
+                    <h1 class="text-4xl md:text-5xl font-light dark:text-white leading-tight max-w-3xl mb-6">O Salto
+                        Quântico: A Próxima Década</h1>
+                    <p class="text-slate-500 dark:text-slate-400 max-w-xl text-lg">Mergulhos profundos nas arquiteturas
+                        que moldarão a próxima década da inteligência artificial global.</p>
+                </div>
+            </div>
+
+
+
+            <!-- News List -->
+            <div class="space-y-0 border-t border-slate-200 dark:border-slate-800">
+                {% for item in news %}
+                <div class="group border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all duration-300 bg-transparent py-4 border-b cursor-pointer relative"
+                    onclick="toggleNews({{ item.id }})">
+
+                    <div class="flex flex-col md:flex-row gap-3 pl-4 pr-2">
+                        <div class="flex-1 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-start mb-1 gap-2">
+                                    <div class="shrink-0 mt-0.5"
+                                        title="{% if item.temperature == 'hot' %} Quente {% elif item.temperature == 'warm' %} Morna {% else %} Fria {% endif %}">
+                                        <span class="material-symbols-outlined text-[18px]
+                                            {% if item.temperature == 'hot' %} text-red-500 
+                                            {% elif item.temperature == 'warm' %} text-orange-400 
+                                            {% else %} text-blue-400 {% endif %}">
+                                            speed
+                                        </span>
+                                    </div>
+                                    <h3
+                                        class="font-mono font-bold dark:text-gray-100 leading-snug group-hover:text-primary transition-colors text-base flex-1">
+                                        {{ item.title }}</h3>
+                                </div>
+                                <p id="desc-{{ item.id }}"
+                                    class="text-slate-500 dark:text-slate-400 text-xs line-clamp-1 leading-relaxed transition-all duration-300">
+                                    {{ item.description }}
+                                </p>
+                            </div>
+
+                            <!-- Expandable Links area that shows up when expanding -->
+                            <div id="source-link-{{ item.id }}"
+                                class="hidden items-center justify-between mt-3 mb-2 pt-3 border-t border-slate-100 dark:border-slate-800/50">
+                                <span class="text-[10px] md:text-xs text-slate-500 flex items-center"><span
+                                        class="material-symbols-outlined text-[14px] mr-1">public</span> Fonte: {{
+                                    item.source }}</span>
+                                <a href="{{ item.link }}" target="_blank" onclick="event.stopPropagation()"
+                                    class="text-[11px] md:text-xs font-semibold text-primary hover:text-blue-400 hover:underline flex items-center gap-1">
+                                    Acessar Notícia Completa <span
+                                        class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                </a>
+                            </div>
+
+                        </div>
+
+                        <!-- Coluna do icone de seta / expanção -->
+                        <div class="flex flex-col items-end justify-center">
+                            <button
+                                class="flex items-center text-slate-400 group-hover:text-primary transition-colors h-full px-2">
+                                <span class="sr-only">Ler mais</span>
+                                <span id="btn-icon-{{ item.id }}"
+                                    class="material-symbols-outlined text-lg transition-transform duration-300">expand_more</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div
+                class="mt-12 flex justify-center border-t border-slate-200 dark:border-slate-800 pt-8 pb-4 text-slate-500 text-sm">
+                <p>© 2050 IA por AI. Todos os direitos reservados. Um sistema feito por Richard e Eric
+                    Miguel</p>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
