@@ -2,6 +2,7 @@ import newspaper
 from newspaper import Article
 import logging
 import concurrent.futures
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -108,31 +109,34 @@ def bulk_extract_articles(articles_base: list, max_workers: int = 3) -> list:
                     })
                 
                 
-                # ADIÇÃO: TRADUÇÃO PARA O PORTUGUÊS DA MANCHETE E DO RESUMO FINAL (se não foi o LLM que cuidou disso)
-                try:
-                     from deep_translator import GoogleTranslator
-                     translator = GoogleTranslator(source='auto', target='pt')
-                     
-                     # Traduz o título original
-                     if base_item.get("title"):
-                          try:
-                              base_item["title"] = translator.translate(base_item["title"])
-                          except Exception:
-                              pass
-                              
-                     # Se o summary foi gerado por fallback do RSS ou Newspaper, usamos tradutor.
-                     # O LLM natural (OpenRouter) já está com prompt para retornar 'Português-BR', mas
-                     # para garantir uniformidade, se não usarmos limite caro, podemos só rodar em tudo se faltou pt
-                     if base_item.get("summary") and "Sem resumo" not in base_item["summary"]:
-                          try:
-                              # Só para assegurar o summary no payload.
-                              translated_sum = translator.translate(base_item["summary"])
-                              base_item["summary"] = translated_sum
-                              base_item["description"] = translated_sum
-                          except Exception:
-                              pass
-                except Exception as ex:
-                     logger.error(f"Erro no módulo de tradução opcional: {ex}")
+                # ADIÇÃO: TRADUÇÃO PARA O PORTUGUÊS DA MANCHETE E DO RESUMO FINAL (se habilitado)
+                use_translation = os.environ.get("USE_TRANSLATION", "true").lower() == "true"
+                
+                if use_translation:
+                    try:
+                         from deep_translator import GoogleTranslator
+                         translator = GoogleTranslator(source='auto', target='pt')
+                         
+                         # Traduz o título original
+                         if base_item.get("title"):
+                              try:
+                                  base_item["title"] = translator.translate(base_item["title"])
+                              except Exception:
+                                  pass
+                                  
+                         # Se o summary foi gerado por fallback do RSS ou Newspaper, usamos tradutor.
+                         # O LLM natural (OpenRouter) já está com prompt para retornar 'Português-BR', mas
+                         # para garantir uniformidade, se não usarmos limite caro, podemos só rodar em tudo se faltou pt
+                         if base_item.get("summary") and "Sem resumo" not in base_item["summary"]:
+                              try:
+                                  # Só para assegurar o summary no payload.
+                                  translated_sum = translator.translate(base_item["summary"])
+                                  base_item["summary"] = translated_sum
+                                  base_item["description"] = translated_sum
+                              except Exception:
+                                  pass
+                    except Exception as ex:
+                         logger.error(f"Erro no módulo de tradução opcional: {ex}")
                 
                 extracted_data.append(base_item)
                     
