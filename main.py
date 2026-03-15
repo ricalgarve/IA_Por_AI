@@ -109,19 +109,42 @@ async def force_update_news(api_key: str = Depends(verify_cron_secret)):
     toda meia-noite. Ela sim faz o scraping bruto assíncrono.
     """
     try:
+        from core.db_util import log_cron_execution
+        
         # A API roda o maestro demorado aqui embaixo dos panos
         new_articles = get_latest_news()
         
         # O Maestro retornou? Salva por cima no DB
         if new_articles:
-            save_news_to_db(new_articles)
-            return {"status": "success", "message": f"{len(new_articles)} notícias atualizadas de forma offline."}
+            inserted_count, warnings = save_news_to_db(new_articles)
+            
+            detalhes = {
+                "message": f"Tentativa de salvar {len(new_articles)} artigos extraídos.",
+                "warnings": warnings,
+                "inserted_count": inserted_count
+            }
+            log_cron_execution(total_noticias=inserted_count, sucesso=True, detalhes=detalhes)
+            
+            return {"status": "success", "message": f"{inserted_count} notícias atualizadas de forma offline."}
         else:
-            return {"status": "error", "message": "Nenhuma notícia foi extraída das fontes."}
+            log_cron_execution(total_noticias=0, sucesso=True, detalhes={"message": "Nenhuma notícia nova foi retornada pelos feeds/LLM."})
+            return {"status": "success", "message": "Nenhuma notícia foi extraída das fontes."}
+            
     except Exception as e:
         # Pega a linha exata e a causa do erro na Vercel
         error_trace = traceback.format_exc()
         print(f"ERRO CRÍTICO no Cron Job:\n{error_trace}")
+        
+        try:
+            from core.db_util import log_cron_execution
+            detalhes_erro = {
+                "error": str(e),
+                "trace": error_trace
+            }
+            log_cron_execution(total_noticias=0, sucesso=False, detalhes=detalhes_erro)
+        except Exception as log_error:
+            print(f"Erro ao tentar gravar o trace na tabela de log: {log_error}")
+            
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

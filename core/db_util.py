@@ -53,13 +53,14 @@ def load_news_from_db() -> list:
         logging.error(f"Erro lendo do Supabase: {e}")
         return []
 
-def save_news_to_db(news_list: list):
+def save_news_to_db(news_list: list) -> tuple[int, list]:
     """Grava as notícias no Supabase, evitando duplicatas por URL e por semântica (LLM) no mesmo dia"""
     supabase = get_supabase()
     if not supabase:
         logging.error("Supabase não configurado. Adicione SUPABASE_URL e SUPABASE_KEY.")
-        return
+        return 0, ["Supabase não configurado"]
         
+    warnings = []
     try:
         current_date_str = datetime.now().strftime("%Y-%m-%d")
         start_of_day = f"{current_date_str}T00:00:00"
@@ -101,7 +102,9 @@ def save_news_to_db(news_list: list):
             
             if skip_old_news:
                 titulo_log = item.get("title", "Sem Título")
-                logging.info(f"Ignorando notícia antiga ({pub_str}): {titulo_log}")
+                msg = f"Ignorando notícia antiga ({pub_str}): {titulo_log}"
+                logging.info(msg)
+                warnings.append(msg)
                 continue
             
             if not data_noticia:
@@ -113,7 +116,9 @@ def save_news_to_db(news_list: list):
             # Checa duplicidade semântica contra todas as publicadas hoje E as que acabaram de entrar no mesmo Cron
             is_dup = check_semantic_duplicate_with_llm(titulo_candidato, resumo_candidato, existing_titles_today)
             if is_dup:
-                logging.info(f"LLM ignorou por ser duplicada na rodada atual: {titulo_candidato}")
+                msg = f"LLM ignorou por ser duplicada na rodada atual: {titulo_candidato}"
+                logging.info(msg)
+                warnings.append(msg)
                 continue
             
             # Anotamos na variável em memória pra não gravar a mesma notícia de outra fonte nos próximos loopings no mesmo Cron
@@ -130,9 +135,31 @@ def save_news_to_db(news_list: list):
         
         if new_records:
             supabase.table("noticias").insert(new_records).execute()
+            return len(new_records), warnings
+            
+        return 0, warnings
             
     except Exception as e:
-        logging.error(f"Erro gravando no Supabase: {e}")
+        msg = f"Erro gravando no Supabase: {e}"
+        logging.error(msg)
+        raise e
+
+def log_cron_execution(total_noticias: int, sucesso: bool, detalhes: dict):
+    """Grava o log de execução do Cron na tabela log_atualizacoes"""
+    supabase = get_supabase()
+    if not supabase:
+        logging.error("Supabase não configurado. Não foi possível gravar log_atualizacoes.")
+        return
+    try:
+        # A coluna 'created_at' deve ser preenchida automaticamente pelo Supabase
+        supabase.table("log_atualizacoes").insert({
+            "total_noticias": total_noticias,
+            "sucesso": sucesso,
+            "detalhes": detalhes
+        }).execute()
+        logging.info("Log de atualização gravado com sucesso.")
+    except Exception as e:
+        logging.error(f"Erro gravando log na tabela log_atualizacoes: {e}")
 
 def subscribe_newsletter(email: str) -> bool:
     """Inscreve um email na newsletter no Supabase"""
