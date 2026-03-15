@@ -11,18 +11,45 @@ def extract_article_content(url: str, lang: str = 'pt') -> dict:
     o corpo textual principal e resumo.
     """
     try:
-        article = Article(url, language=lang)
+        from core.newspaper_config import Config
+    except ImportError:
+        from newspaper import Config
+    
+    try:
+        config = Config()
+        config.browser_user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        config.request_timeout = 10
+        # Bloomberg and others often block with 403s.
+        
+        article = Article(url, language=lang, config=config)
         article.download()
+        
+        if article.download_state != 2:
+            return {"success": False, "error": f"Scraping bloqueado ou falhou: state={article.download_state}"}
+            
         article.parse()
         
-        # Como o Vercel não tem NTLK instalado como global sem requirements dificeis,
-        # Nós usamos processamento de slice se o NLP.summary() der erro.
         try:
-            article.nlp()
-            summary = article.summary
-        except Exception:
-            # Fallback para extrair um pedaço do texto em vez da biblioteca pesada de NLP
-            summary = article.text[:250] + "..." if article.text else ""
+            from core.llm_processor import summarize_text_with_llm
+            # Tenta gerar o resumo limpo pela IA do OpenRouter!
+            summary = summarize_text_with_llm(article.text)
+            
+            # Se a IA não fez muita coisa e limitou, tentamos fallback do próprio library se for vazio
+            if not summary or str(summary).strip() == "" or "erro" in str(summary).lower():
+                 if article.summary and str(article.summary).strip():
+                      summary = article.summary
+                 elif article.text:
+                      summary = article.text[:250] + "..."
+                 else:
+                      summary = "Resumo indisponível."
+            
+        except ImportError:
+             # Fallback caso não encontrem o lllm_processor.py por qualquer motivo (ainda que criei)
+             try:
+                 article.nlp()
+                 summary = article.summary
+             except Exception:
+                 summary = article.text[:250] + "..." if article.text else "Resumo indisponível."
             
         return {
             "title": article.title,
@@ -32,8 +59,8 @@ def extract_article_content(url: str, lang: str = 'pt') -> dict:
             "success": True
         }
     except Exception as e:
-        logger.error(f"Erro extraindo {url}: {e}")
-        return {"success": False, "error": str(e)}
+        logger.warning(f"Erro extraindo {url}: {e.__class__.__name__} - {str(e)[:100]}")
+        return {"success": False, "error": "Artigo protegido por paywall ou Cloudflare"}
 
 def bulk_extract_articles(articles_base: list, max_workers: int = 3) -> list:
     """
@@ -62,10 +89,50 @@ def bulk_extract_articles(articles_base: list, max_workers: int = 3) -> list:
                     base_item.update({
                         "extracted_title": extraction.get("title", ""),
                         "summary": extraction.get("summary", ""),
+                        "description": extraction.get("summary", ""),
                         "original_text": extraction.get("text", "")
                     })
                 else:
-                    base_item.update({"summary": "Sem resumo disponível. Link direto para o artigo."})
+                    # TENTA PEGAR O CONTEÚDO ORIGINAL DO RSS SE NÃO DEU CERTO BAIXAR
+                    rss_desc = base_item.get("description_rss", "")
+                    if rss_desc:
+                         import re
+                         clean_desc = re.sub('<[^<]+?>', '', rss_desc) # remove tags HTML
+                         fallback_desc = f"{clean_desc[:250]}..."
+                    else:
+                         fallback_desc = "Sem resumo disponível. Link direto para o artigo."
+
+                    base_item.update({
+                        "summary": fallback_desc,
+                        "description": fallback_desc
+                    })
+                
+                
+                # ADIÇÃO: TRADUÇÃO PARA O PORTUGUÊS DA MANCHETE E DO RESUMO FINAL (se não foi o LLM que cuidou disso)
+                try:
+                     from deep_translator import GoogleTranslator
+                     translator = GoogleTranslator(source='auto', target='pt')
+                     
+                     # Traduz o título original
+                     if base_item.get("title"):
+                          try:
+                              base_item["title"] = translator.translate(base_item["title"])
+                          except Exception:
+                              pass
+                              
+                     # Se o summary foi gerado por fallback do RSS ou Newspaper, usamos tradutor.
+                     # O LLM natural (OpenRouter) já está com prompt para retornar 'Português-BR', mas
+                     # para garantir uniformidade, se não usarmos limite caro, podemos só rodar em tudo se faltou pt
+                     if base_item.get("summary") and "Sem resumo" not in base_item["summary"]:
+                          try:
+                              # Só para assegurar o summary no payload.
+                              translated_sum = translator.translate(base_item["summary"])
+                              base_item["summary"] = translated_sum
+                              base_item["description"] = translated_sum
+                          except Exception:
+                              pass
+                except Exception as ex:
+                     logger.error(f"Erro no módulo de tradução opcional: {ex}")
                 
                 extracted_data.append(base_item)
                     

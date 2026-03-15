@@ -1,9 +1,9 @@
-requests
-feedparser
-feedsearch
-pygooglenews
-newspaper3k
 fastapi
 uvicorn
 jinja2
+feedparser
+newspaper3k
+requests
+pygooglenews
+deep-translator
 python-dateutil
