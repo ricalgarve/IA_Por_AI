@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 # Pegamos a chave de ambiente e default
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 # Configura o LLM que usaremos no OpenRouter (como gemma, llama, mistral - de preferência grátis ou o que estiver pagando)
-LLM_MODEL = os.environ.get("LLM_MODEL", "google/gemma-7b-it") 
+LLM_MODEL = os.environ.get("LLM_MODEL", "meta-llama/llama-3.3-70b-instruct:free") 
 
 def summarize_text_with_llm(text: str) -> str:
     """
@@ -38,8 +38,7 @@ def summarize_text_with_llm(text: str) -> str:
     }
     
     payload = {
-        # O Llama 3 é muito melhor em aderir ao comando de idioma que o Gemma 7b
-        "model": "meta-llama/llama-3.1-8b-instruct:free", 
+        "model": LLM_MODEL, 
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -50,7 +49,7 @@ def summarize_text_with_llm(text: str) -> str:
     
     try:
         response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
+            os.environ.get("OPENROUTER_API_URL", "https://openrouter.ai/api/v1/chat/completions"), 
             headers=headers,
             json=payload,
             timeout=15
