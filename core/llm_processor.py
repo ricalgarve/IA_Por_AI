@@ -2,6 +2,10 @@ import requests
 import os
 import logging
 from typing import Optional
+import warnings
+
+# Suprime os avisos de SyntaxWarning (falsos positivos do log 'error' da Vercel) causados pela biblioteca newspaper3k 
+warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +19,7 @@ def call_openrouter(messages: list) -> str:
     if not OPENROUTER_API_KEY:
         return "Estou passando por problemas técnicos no momento. Por favor, entre em contato pelo WhatsApp presente no site."
         
-    url = os.environ.get("OPENROUTER_API_URL", "")
+    url = os.environ.get("OPENROUTER_API_URL", "https://openrouter.ai/api/v1/chat/completions")
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
