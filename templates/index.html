@@ -34,12 +34,25 @@
             },
         }
 
+        async function sendLog(acao, id_noticia) {
+            try {
+                await fetch('/api/log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ acao: acao, id_noticia: id_noticia })
+                });
+            } catch (e) {
+                console.error('Erro ao enviar log:', e);
+            }
+        }
+
         function toggleNews(id) {
             const desc = document.getElementById(`desc-${id}`);
             const btnIcon = document.getElementById(`btn-icon-${id}`);
             const sourceLink = document.getElementById(`source-link-${id}`);
 
             if (desc.classList.contains('line-clamp-1')) {
+                sendLog('expandir_noticia', id);
                 // Expand
                 desc.classList.remove('line-clamp-1');
                 desc.classList.add('line-clamp-10');
@@ -209,11 +222,19 @@
                                 <span class="text-[10px] md:text-xs text-slate-500 flex items-center"><span
                                         class="material-symbols-outlined text-[14px] mr-1">public</span> Fonte: {{
                                     item.source }}{% if item.published %} &nbsp;&bull;&nbsp; {{ item.published[:16] }}{% endif %}</span>
-                                <a href="{{ item.url }}" target="_blank" onclick="event.stopPropagation()"
-                                    class="text-[11px] md:text-xs font-semibold text-primary hover:text-blue-400 hover:underline flex items-center gap-1">
-                                    Acessar Notícia Completa <span
-                                        class="material-symbols-outlined text-[14px]">open_in_new</span>
-                                </a>
+                                <div class="flex items-center gap-3">
+                                    {% if item.source in ['TechCrunch', 'Ars Technica', 'Business Insider', 'The Guardian AI', 'Fortune', 'The Decoder', 'Bloomberg Tech'] %}
+                                    <a href="https://translate.google.com/translate?sl=auto&tl=pt&u={{ item.url }}" target="_blank" onclick="event.stopPropagation(); sendLog('acessar_noticia_traduzida', {{ item.id }});"
+                                        class="text-[11px] md:text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:underline flex items-center gap-1">
+                                        Ler Traduzida <span class="material-symbols-outlined text-[14px]">translate</span>
+                                    </a>
+                                    {% endif %}
+                                    <a href="{{ item.url }}" target="_blank" onclick="event.stopPropagation(); sendLog('acessar_noticia_completa', {{ item.id }});"
+                                        class="text-[11px] md:text-xs font-semibold text-primary hover:text-blue-400 hover:underline flex items-center gap-1">
+                                        Acessar Original <span
+                                            class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                    </a>
+                                </div>
                             </div>
 
                         </div>

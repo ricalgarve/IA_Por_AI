@@ -176,3 +176,23 @@ def subscribe_newsletter(email: str) -> bool:
 # Apelidos para funções de load/save padrão para não quebrar locais que já usem
 load_news_from_json = load_news_from_db
 save_news_to_json = save_news_to_db
+
+def log_interaction(ip: str, acao: str, id_noticia: int | None = None):
+    """Grava o log de interação na tabela log_interacoes"""
+    supabase = get_supabase()
+    if not supabase:
+        logging.error("Supabase não configurado. Não foi possível gravar log de interação.")
+        return
+    try:
+        from typing import Any
+        data: dict[str, Any] = {
+            "IP": ip,
+            "acao": acao
+        }
+        if id_noticia is not None:
+            data["id_noticia"] = id_noticia
+            
+        supabase.table("log_interacoes").insert(data).execute()
+        logging.info(f"Log de interação gravado: {acao} para IP {ip}")
+    except Exception as e:
+        logging.error(f"Erro gravando log na tabela log_interacoes: {e}")

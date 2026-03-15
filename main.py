@@ -76,6 +76,17 @@ async def home(request: Request, date: Optional[str] = None):
         filtered_news = [n for n in parsed_news if n.get("extracted_date") == selected_date]
     else:
         filtered_news = parsed_news
+        
+    try:
+        from core.db_util import log_interaction
+        client_ip = request.client.host if request.client else "unknown"
+        x_forwarded_for = request.headers.get("x-forwarded-for")
+        if x_forwarded_for:
+            client_ip = x_forwarded_for.split(",")[0].strip()
+        acao = "filtro_data" if date else "acesso_home"
+        log_interaction(ip=client_ip, acao=acao)
+    except Exception:
+        pass
     
     return templates.TemplateResponse("index.html", {
         "request": request, 
@@ -146,6 +157,24 @@ async def force_update_news(api_key: str = Depends(verify_cron_secret)):
             print(f"Erro ao tentar gravar o trace na tabela de log: {log_error}")
             
         raise HTTPException(status_code=500, detail=str(e))
+
+class LogInteraction(BaseModel):
+    id_noticia: Optional[int] = None
+    acao: str
+
+@app.post("/api/log")
+async def api_log_interaction(request: Request, log_data: LogInteraction):
+    client_ip = request.client.host if request.client else "unknown"
+    x_forwarded_for = request.headers.get("x-forwarded-for")
+    if x_forwarded_for:
+        client_ip = x_forwarded_for.split(",")[0].strip()
+
+    try:
+        from core.db_util import log_interaction
+        log_interaction(ip=client_ip, acao=log_data.acao, id_noticia=log_data.id_noticia)
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 if __name__ == "__main__":
     import uvicorn
