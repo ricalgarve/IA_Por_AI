@@ -137,6 +137,19 @@ def bulk_extract_articles(articles_base: list, max_workers: int = 3) -> list:
                 extracted_data.append(base_item)
                     
             except Exception as e:
-                logger.error(f"Worker reportou falha: {e}")
+                logger.error(f"Worker reportou falha ao processar {base_item.get('url')}: {e}")
+                # CAIU NUM ERRO GRAVE NO WORKER: NÃO PERCA A NOTÍCIA. FAÇA FALLBACK PARA O RSS:
+                rss_desc = base_item.get("description_rss", "")
+                if rss_desc:
+                    import re
+                    clean_desc = re.sub('<[^<]+?>', '', str(rss_desc)) # remove tags HTML
+                    fallback_desc = f"{clean_desc[:250]}..."
+                else:
+                    fallback_desc = "Sem resumo disponível. Link direto para o artigo."
+                base_item.update({
+                    "summary": fallback_desc,
+                    "description": fallback_desc
+                })
+                extracted_data.append(base_item)
                 
     return extracted_data

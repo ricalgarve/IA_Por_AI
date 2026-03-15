@@ -10,15 +10,42 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 # Configura o LLM que usaremos no OpenRouter (como gemma, llama, mistral - de preferência grátis ou o que estiver pagando)
 LLM_MODEL = os.environ.get("LLM_MODEL", "meta-llama/llama-3.3-70b-instruct:free") 
 
+def call_openrouter(messages: list) -> str:
+    """Função base que converte a lista de messages num request HTTP pro OpenRouter"""
+    if not OPENROUTER_API_KEY:
+        return "Estou passando por problemas técnicos no momento. Por favor, entre em contato pelo WhatsApp presente no site."
+        
+    url = os.environ.get("OPENROUTER_API_URL", "https://openrouter.ai/api/v1/chat/completions")
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:8000", # Will be updated safely when deployed
+        "X-Title": "IA_Por_AI"
+    }
+    
+    data = {
+        "model": LLM_MODEL,
+        "messages": messages,
+        "temperature": 0.5,
+        "max_tokens": 500
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=15)
+        response.raise_for_status()
+        result = response.json()
+        if "choices" in result and len(result["choices"]) > 0:
+            return result["choices"][0]["message"]["content"]
+        return "Desculpe, não consegui processar a resposta neste momento."
+    except Exception as e:
+        logger.error(f"Error calling OpenRouter: {e}")
+        return "Desculpe, houve um erro ao tentar conectar ao meu cérebro virtual no momento. Você poderia tentar novamente em alguns instantes?"
+
 def summarize_text_with_llm(text: str) -> str:
     """
     Recebe um texto longo (como o body de uma notícia) e usa um LLM via OpenRouter
     para retornar um resumo conciso.
     """
-    if not OPENROUTER_API_KEY:
-        logger.warning("OPENROUTER_API_KEY não configurada. Usando fallback de parse local.")
-        return str(text)[:250] + "..." if text else ""
-        
     if not text or len(str(text)) < 50:
         return str(text)
         
@@ -30,38 +57,15 @@ def summarize_text_with_llm(text: str) -> str:
     
     user_prompt = f"Resuma as informações principais da notícia a seguir em um único parágrafo conciso em Português (máximo 40 palavras). Não comece com 'A notícia diz' ou 'O resumo é'. Entregue direto o fato:\n\nNOTÍCIA:\n{cutoff_text}"
     
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:8000", # Recomendação da OpenRouter
-        "X-Title": "IA_Por_AI",
-    }
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
     
-    payload = {
-        "model": LLM_MODEL, 
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        "temperature": 0.3,
-        "max_tokens": 100
-    }
+    resumo = call_openrouter(messages)
     
-    try:
-        response = requests.post(
-            os.environ.get("OPENROUTER_API_URL", "https://openrouter.ai/api/v1/chat/completions"), 
-            headers=headers,
-            json=payload,
-            timeout=15
-        )
-        response.raise_for_status()
-        data = response.json()
-        
-        choices = data.get("choices", [])
-        if choices:
-            return choices[0].get("message", {}).get("content", "").strip()
-        else:
-            return "Resumo não disponível."
-    except Exception as e:
-        logger.error(f"Erro chamando OpenRouter LLM: {e}")
-        return text[:250] + "..." if text else ""
+    # Se bater no erro amigável criado pela API Base, disfarçamos cortando via local-fallback
+    if "Desculpe, houve um erro" in resumo or "Estou passando por problemas técnicos" in resumo:
+        return text[:250] + "..."
+    
+    return resumo.strip()
