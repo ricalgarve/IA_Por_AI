@@ -1,50 +1,104 @@
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, Security, Depends
+from fastapi.security.api_key import APIKeyHeader
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from core.news_service import get_latest_news
+from core.db_util import load_news_from_json, save_news_to_json
 
-app = FastAPI(title="Notícias Rápidas")
+API_KEY = "segredo123" # Em prod, isso deveria vir de os.environ.get("API_KEY")
+api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
+
+def verify_api_key(api_key: str = Security(api_key_header)):
+    if api_key != API_KEY:
+        raise HTTPException(status_code=403, detail="Acesso não autorizado")
+    return api_key
+
+app = FastAPI(title="Notícias Rápidas - IA por AI")
 
 # Define base path to ensure templates are found whether run locally or on Vercel
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(BASE_DIR, "templates")
 templates = Jinja2Templates(directory=templates_dir)
 
-MOCK_NEWS = [
-    {
-        "id": 1,
-        "title": "Avanços em Inteligência Artificial Prometem Revolucionar a Medicina",
-        "description": "Pesquisadores ao redor do mundo estão utilizando modelos de IA generativa para acelerar a descoberta de novos medicamentos e otimizar processos de diagnóstico. Em um estudo recente, um novo modelo foi testado com sucesso, identificando com precisão anomalias em exames de imagem que escapariam a olhos não treinados. Especialistas acreditam que, nos próximos anos, a adoção destas ferramentas reduzirá o tempo no diagnóstico precoce de doenças graves, melhorando o tratamento para milhares de pacientes e ajudando a personalizar os tratamentos de acordo com o padrão genético de cada indivíduo, elevando a medicina moderna ao próximo nível.",
-        "source": "Tech Health Journal",
-        "link": "https://example.com/noticia-ia",
-        "temperature": "hot"
-    },
-    {
-        "id": 2,
-        "title": "Mercado Financeiro Adota Algoritmos Quânticos para Previsões",
-        "description": "Instituições financeiras estão investindo pesado em computação quântica para modelagem de risco e projeções de mercado. O uso de qubits permite a simulação de múltiplos cenários econômicos simultaneamente, algo impossível de ser alcançado com a mesma velocidade em supercomputadores clássicos. Um grande banco europeu anunciou recentemente que sua nova plataforma quântica conseguiu processar em minutos cálculos que levariam semanas, proporcionando vantagens competitivas únicas. Apesar do alto custo inicial, a expectativa de longo prazo é de um grande retorno.",
-        "source": "Economia Quântica",
-        "link": "https://example.com/noticia-quantica",
-        "temperature": "warm"
-    },
-    {
-        "id": 3,
-        "title": "Novas Tecnologias de Baterias Aumentam Autonomia de Veículos Elétricos",
-        "description": "Com o avanço das baterias de estado sólido, a indústria automotiva prevê um salto substancial na autonomia dos veículos elétricos (VEs) ainda nesta década. Diversas startups relataram progressos na estabilidade de seus protótipos, que são capazes de oferecer até o dobro de densidade energética em comparação às tradicionais baterias de íons de lítio. Além disso, essa nova geração de baterias promete tempos de recarga ultra rápidos e muito mais segurança, reduzindo riscos de incêndio e superaquecimento durante o uso contínuo das células.",
-        "source": "Auto Tech News",
-        "link": "https://example.com/noticia-baterias",
-        "temperature": "cold"
-    },
-    {
-        "id": 4,
-        "title": "Exploração Espacial: Nova Missão Comercial Planejada para Marte",
-        "description": "Uma coalizão de empresas aeroespaciais anunciou hoje o lançamento de uma missão conjunta para estabelecer a primeira base de pesquisa comercial no planeta vermelho. Com o apoio de inovações em propulsão nuclear térmica e sistemas avançados de suporte à vida, a viagem deverá ser mais curta e segura para os astronautas. A missão visa explorar minerais raros e realizar testes biológicos sob condições extremas de gravidade reduzida, marcando definitivamente uma nova fase na corrida espacial e ampliando os horizontes da exploração interplanetária.",
-        "source": "Galactic Times",
-        "link": "https://example.com/noticia-espaco",
-        "temperature": "hot"
-    }
-]
+
+
+from dateutil.parser import parse as date_parse
+from datetime import datetime
+from typing import Optional
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "news": MOCK_NEWS})
+async def home(request: Request, date: Optional[str] = None):
+    # Agora o site principal NUNCA acessa a internet. Ele apenas lê o JSON de cache super rápido!
+    cached_news = load_news_from_json()
+    
+    # Processar datas
+    available_dates = set()
+    parsed_news = []
+    
+    for item in cached_news:
+        pub_str = item.get("published", "")
+        extracted_date_str = None
+        if pub_str:
+            try:
+                # Extraindo o objeto data do string RFC ou qualquer que for o RSS
+                dt = date_parse(pub_str)
+                extracted_date_str = dt.strftime("%Y-%m-%d")
+                
+                # Ignorar notícias antes de 14/03/2026
+                if extracted_date_str < "2026-03-14":
+                    continue
+                    
+                available_dates.add(extracted_date_str)
+            except Exception:
+                pass
+        
+        # Guardaremos a string no próprio objeto pelo menos pra facilitar a UI
+        item["extracted_date"] = extracted_date_str
+        parsed_news.append(item)
+        
+    dates_list = sorted(list(available_dates), reverse=True)
+    
+    # Se na barra de pesquisa for passada uma query ?date=...
+    if date and date in dates_list:
+        selected_date = date
+    elif dates_list:
+        selected_date = dates_list[0] # Default é o dia mais novo
+    else:
+        selected_date = None
+        
+    # Filtrar o payload pras noticias apenas do Selected Date
+    if selected_date:
+        filtered_news = [n for n in parsed_news if n.get("extracted_date") == selected_date]
+    else:
+        filtered_news = parsed_news
+    
+    return templates.TemplateResponse("index.html", {
+        "request": request, 
+        "news": filtered_news,
+        "available_dates": dates_list,
+        "selected_date": selected_date
+    })
+
+@app.post("/api/cron/update-news")
+async def force_update_news(api_key: str = Depends(verify_api_key)):
+    """
+    Rota a ser chamada via CRON JOB (ex: Vercel Cron, Github Actions, Cron-job.org) 
+    toda meia-noite. Ela sim faz o scraping bruto assíncrono.
+    """
+    try:
+        # A API roda o maestro demorado aqui embaixo dos panos
+        new_articles = get_latest_news()
+        
+        # O Maestro retornou? Salva por cima no JSON
+        if new_articles:
+            save_news_to_json(new_articles)
+            return {"status": "success", "message": f"{len(new_articles)} notícias atualizadas de forma offline."}
+        else:
+            return {"status": "error", "message": "Nenhuma notícia foi extraída das fontes."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

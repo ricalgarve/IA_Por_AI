@@ -6,3 +6,4 @@ newspaper3k
 fastapi
 uvicorn
 jinja2
+python-dateutil
