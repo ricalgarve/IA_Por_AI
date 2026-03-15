@@ -15,7 +15,7 @@ def call_openrouter(messages: list) -> str:
     if not OPENROUTER_API_KEY:
         return "Estou passando por problemas técnicos no momento. Por favor, entre em contato pelo WhatsApp presente no site."
         
-    url = os.environ.get("OPENROUTER_API_URL", "https://openrouter.ai/api/v1/chat/completions")
+    url = os.environ.get("OPENROUTER_API_URL", "")
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
