@@ -14,8 +14,14 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 # Configura o LLM que usaremos no OpenRouter (como gemma, llama, mistral - de preferência grátis ou o que estiver pagando)
 LLM_MODEL = os.environ.get("LLM_MODEL", "meta-llama/llama-3.3-70b-instruct:free") 
 
+# Chave global (boolean flag) para usar o LLM ou apenas os text-truncates brutos
+USE_LLM = os.environ.get("USE_LLM", "true").lower() == "true"
+
 def call_openrouter(messages: list) -> str:
     """Função base que converte a lista de messages num request HTTP pro OpenRouter"""
+    if not USE_LLM:
+        return "Estou passando por problemas técnicos" # O fallback do summarize_text cuida do truncate bruto
+        
     if not OPENROUTER_API_KEY:
         return "Estou passando por problemas técnicos no momento. Por favor, entre em contato pelo WhatsApp presente no site."
         
@@ -28,14 +34,16 @@ def call_openrouter(messages: list) -> str:
     }
     
     data = {
-        "model": LLM_MODEL,
+        # O Gemini 2.5 Flash é um modelo gratuito MUITO rápido (diminiu as chances do Read Timed Out da Vercel)
+        "model": os.environ.get("LLM_MODEL", "google/gemini-2.5-flash"),
         "messages": messages,
         "temperature": 0.5,
         "max_tokens": 500
     }
     
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=15)
+        # TIMEOUT AUMENTADO para 30 SEGUNDOS
+        response = requests.post(url, headers=headers, json=data, timeout=30)
         response.raise_for_status()
         result = response.json()
         if "choices" in result and len(result["choices"]) > 0:
