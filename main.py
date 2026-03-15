@@ -6,13 +6,15 @@ from fastapi.templating import Jinja2Templates
 from core.news_service import get_latest_news
 from core.db_util import load_news_from_json, save_news_to_json
 
-API_KEY = "segredo123" # Em prod, isso deveria vir de os.environ.get("API_KEY")
-api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-def verify_api_key(api_key: str = Security(api_key_header)):
-    if api_key != API_KEY:
-        raise HTTPException(status_code=403, detail="Acesso não autorizado")
-    return api_key
+CRON_SECRET = os.environ.get("CRON_SECRET", "segredo_local_teste")
+security = HTTPBearer()
+
+def verify_cron_secret(credentials: HTTPAuthorizationCredentials = Security(security)):
+    if credentials.credentials != CRON_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return credentials.credentials
 
 app = FastAPI(title="Notícias Rápidas - IA por AI")
 
@@ -80,8 +82,8 @@ async def home(request: Request, date: Optional[str] = None):
         "selected_date": selected_date
     })
 
-@app.post("/api/cron/update-news")
-async def force_update_news(api_key: str = Depends(verify_api_key)):
+@app.get("/api/cron/update-news")
+async def force_update_news(api_key: str = Depends(verify_cron_secret)):
     """
     Rota a ser chamada via CRON JOB (ex: Vercel Cron, Github Actions, Cron-job.org) 
     toda meia-noite. Ela sim faz o scraping bruto assíncrono.
