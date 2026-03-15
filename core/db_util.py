@@ -62,13 +62,15 @@ def save_news_to_db(news_list: list):
         
     try:
         current_date_str = datetime.now().strftime("%Y-%m-%d")
+        start_of_day = f"{current_date_str}T00:00:00"
+        end_of_day = f"{current_date_str}T23:59:59.999999"
         
         # Pega as URLs cadastradas (pra evitar reprocessos óbvios)
         existing_response = supabase.table("noticias").select("url").execute()
         existing_urls = {row["url"] for row in existing_response.data}
         
         # Pega os títulos já salvos DE HOJE para realizar a checagem com a IA
-        existing_today_response = supabase.table("noticias").select("titulo").like("data_noticia", f"{current_date_str}%").execute()
+        existing_today_response = supabase.table("noticias").select("titulo").gte("data_noticia", start_of_day).lte("data_noticia", end_of_day).execute()
         existing_titles_today = [row["titulo"] for row in existing_today_response.data if row.get("titulo")]
         
         try:
