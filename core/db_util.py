@@ -2,12 +2,19 @@ import os
 import json
 from datetime import datetime
 
-DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+# Ambientes Serverless (Vercel) não permitem gravação de arquivos por padrão a não ser na pasta transitória /tmp
+IS_VERCEL = os.environ.get("VERCEL") == "1" or "VERCEL_REGION" in os.environ
+
+if IS_VERCEL:
+    DATA_PATH = "/tmp/ia_por_ai_data"
+else:
+    DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+
 NEWS_JSON_FILE = os.path.join(DATA_PATH, "news.json")
 
 def ensure_data_dir():
     if not os.path.exists(DATA_PATH):
-        os.makedirs(DATA_PATH)
+        os.makedirs(DATA_PATH, exist_ok=True)
 
 def load_news_from_json() -> list:
     """Carrega as notícias formatadas a partir do arquivo JSON"""

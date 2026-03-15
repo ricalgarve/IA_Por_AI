@@ -31,9 +31,21 @@ from typing import Optional
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, date: Optional[str] = None):
-    # Agora o site principal NUNCA acessa a internet. Ele apenas lê o JSON de cache super rápido!
+    # Lemos os dados salvos pelo Cron ou da sessão anterior da Lambda
     cached_news = load_news_from_json()
     
+    # FALLBACK DE EMERGÊNCIA (Obrigatório para Vercel Free Tier):
+    # As funções da Vercel "esquecem" arquivos de sua pasta /tmp depois de algumas horas de inatividade. 
+    # Se o primeiro visitante do dia acessar antes do fluxo cron rodar, fazemos a primeira carga sob demanda!
+    if not cached_news:
+        try:
+            cached_news = get_latest_news()
+            if cached_news:
+                save_news_to_json(cached_news)
+        except Exception as e:
+            cached_news = []
+            print(f"Erro na carga ao vivo: {e}")
+            
     # Processar datas
     available_dates = set()
     parsed_news = []
@@ -82,6 +94,8 @@ async def home(request: Request, date: Optional[str] = None):
         "selected_date": selected_date
     })
 
+import traceback
+
 @app.get("/api/cron/update-news")
 async def force_update_news(api_key: str = Depends(verify_cron_secret)):
     """
@@ -99,6 +113,9 @@ async def force_update_news(api_key: str = Depends(verify_cron_secret)):
         else:
             return {"status": "error", "message": "Nenhuma notícia foi extraída das fontes."}
     except Exception as e:
+        # Pega a linha exata e a causa do erro na Vercel
+        error_trace = traceback.format_exc()
+        print(f"ERRO CRÍTICO no Cron Job:\n{error_trace}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
