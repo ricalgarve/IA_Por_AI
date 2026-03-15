@@ -26,12 +26,9 @@ def summarize_text_with_llm(text: str) -> str:
     safe_text = str(text)
     cutoff_text = safe_text[:8000] # +- 2000 words limit
     
-    prompt = f"""Você é um jornalista de tecnologia e IA focado em resumições exatas.
-Suma as informações principais da notícia a seguir em um único parágrafo conciso em Português-BR (máximo 40 palavras). Não comece com "A notícia diz" ou "O resumo é". Entregue direto o fato:
-
-NOTÍCIA: 
-{cutoff_text}
-"""
+    system_prompt = "Você é um jornalista de tecnologia sênior. Sua tarefa é ler notícias e retornar um resumo OBRIGATORIAMENTE em Português do Brasil (PT-BR). Se o texto fornecido estiver em inglês ou outro idioma, você DEVE traduzir para o Português. NUNCA responda em inglês."
+    
+    user_prompt = f"Resuma as informações principais da notícia a seguir em um único parágrafo conciso em Português (máximo 40 palavras). Não comece com 'A notícia diz' ou 'O resumo é'. Entregue direto o fato:\n\nNOTÍCIA:\n{cutoff_text}"
     
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -41,9 +38,11 @@ NOTÍCIA:
     }
     
     payload = {
-        "model": "google/gemma-7b-it:free", # Forçando modelo free pra testes (remova :free pra prod se quiser)
+        # O Llama 3 é muito melhor em aderir ao comando de idioma que o Gemma 7b
+        "model": "meta-llama/llama-3.1-8b-instruct:free", 
         "messages": [
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
         ],
         "temperature": 0.3,
         "max_tokens": 100

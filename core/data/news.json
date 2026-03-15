@@ -1,53 +1,18 @@
 {
-  "last_updated": "2026-03-14T22:35:01.930984",
+  "last_updated": "2026-03-14T22:59:18.321119",
   "news": [
-    {
-      "title": "China promove \"empresas individuais\" do OpenClaw com milhões em subsídios para agentes de IA",
-      "url": "https://the-decoder.com/china-pushes-openclaw-one-person-companies-with-millions-in-ai-agent-subsidies/",
-      "source": "The Decoder",
-      "published": "Sat, 14 Mar 2026 12:19:26 +0000",
-      "description_rss": "<p><img alt=\"\" class=\"attachment-full size-full wp-post-image\" height=\"768\" src=\"https://the-decoder.com/wp-content/uploads/2026/03/china_open-Claw.png\" style=\"height: auto; margin-bottom: 10px;\" width=\"1376\" /></p>\n<p>        At least seven Chinese local governments have launched million-dollar funding programs for OpenClaw projects within days. The goal: \"one-person companies\" where a single founder runs a business with AI agents as employees.</p>\n<p>The article <a href=\"https://the-decoder.com/china-pushes-openclaw-one-person-companies-with-millions-in-ai-agent-subsidies/\">China pushes OpenClaw &quot;one-person companies&quot; with millions in AI agent subsidies</a> appeared first on <a href=\"https://the-decoder.com\">The Decoder</a>.</p>",
-      "temperature": "cold",
-      "extracted_title": "China pushes OpenClaw \"one-person companies\" with millions in AI agent subsidies",
-      "summary": "O entusiasmo dos agentes de IA em torno do OpenClaw atingiu duramente a China. Pelo menos sete governos locais implementaram programas de financiamento em poucos dias, informa o SCMP. O ritmo sugere que Pequim vê os agentes de IA construídos em OpenClaw e estruturas semelhantes como um impulso potencial...",
-      "description": "O entusiasmo dos agentes de IA em torno do OpenClaw atingiu duramente a China. Pelo menos sete governos locais implementaram programas de financiamento em poucos dias, informa o SCMP. O ritmo sugere que Pequim vê os agentes de IA construídos em OpenClaw e estruturas semelhantes como um impulso potencial...",
-      "original_text": "The AI agent hype around OpenClaw has hit China hard. At least seven local governments rolled out funding programs within days, SCMP reports. The sheer pace suggests Beijing sees AI agents built on OpenClaw and similar frameworks as a potential driver for economic growth.\n\nHefei's tech district in Anhui province is offering up to 1.4 million dollars in subsidies for housing, offices, and computing power, partly to promote \"one-person companies\" where a single founder works with AI agents as employees. Shenzhen matched with up to 1.4 million dollars, Wuxi with around 700,000 dollars plus computing resources, Changshu with roughly 830,000 dollars, and Changzhou with about 700,000 dollars plus an extra 280,000 dollars for computing power. Nanjing is providing free office space and computing resources.\n\n\"Having AI work for [users], taking care of tasks on their behalf, offers an experience that goes beyond mere talk surrounding the technology,\" says Li Zhi, head of the Intelligent Institute at Analysys International. \"It has tapped into a social sentiment and vision of productivity, ultimately fueling a nationwide craze that has swept up everyone, from tech geeks to ordinary users.\"\n\nAd DEC_D_Incontent-1",
-      "id": 1
-    },
     {
       "title": "Sites de spam de IA inundam a web com informações falsas, e o número está crescendo rapidamente",
       "url": "https://the-decoder.com/ai-spam-websites-flood-the-web-with-false-information-and-the-number-is-growing-fast/",
       "source": "The Decoder",
       "published": "Sat, 14 Mar 2026 14:20:06 +0000",
       "description_rss": "<p><img alt=\"\" class=\"attachment-full size-full wp-post-image\" height=\"768\" src=\"https://the-decoder.com/wp-content/uploads/2026/03/ai_generated_news_spam.png\" style=\"height: auto; margin-bottom: 10px;\" width=\"1376\" /></p>\n<p>        Newsguard and AI detector Pangram Labs have launched a real-time system to spot so-called \"AI content farms.\" More than 3,000 of these sites have already been flagged, with hundreds more popping up every month, and the number keeps growing.</p>\n<p>The article <a href=\"https://the-decoder.com/ai-spam-websites-flood-the-web-with-false-information-and-the-number-is-growing-fast/\">AI spam websites flood the web with false information, and the number is growing fast</a> appeared first on <a href=\"https://the-decoder.com\">The Decoder</a>.</p>",
-      "temperature": "cold",
+      "temperature": "warm",
       "extracted_title": "AI spam websites flood the web with false information, and the number is growing fast",
       "summary": "Pergunte sobre este artigo… Pesquise\n\nA empresa de análise de mídia Newsguard e o detector de IA Pangram Labs lançaram um sistema em tempo real para detectar os chamados “fazendas de conteúdo de IA”. Mais de 3.000 desses sites já foram sinalizados e a contagem está aumentando cada vez mais.",
       "description": "Pergunte sobre este artigo… Pesquise\n\nA empresa de análise de mídia Newsguard e o detector de IA Pangram Labs lançaram um sistema em tempo real para detectar os chamados “fazendas de conteúdo de IA”. Mais de 3.000 desses sites já foram sinalizados e a contagem está aumentando cada vez mais.",
       "original_text": "Ask about this article… Search\n\nMedia analysis company Newsguard and AI detector Pangram Labs have launched a real-time system to spot so-called \"AI content farms.\" More than 3,000 of these sites have already been flagged, and the count is climbing fast.\n\nAI content farms are websites that pump out massive amounts of AI-generated, often inaccurate news and information to cash in on ad revenue or spread propaganda.\n\nThe new system pairs Newsguard's data with Pangram Labs' automated AI detection software. The software first flags websites where a significant chunk of the content comes from AI. Human analysts then review the results and weed out false positives.\n\nAd\n\nSo far, the system has identified 3,006 AI content farms, according to Newsguard. That number has more than doubled in a year and is currently growing by 300 to 500 new sites per month.\n\nAd DEC_D_Incontent-1\n\nA site gets labeled an AI content farm when three conditions are met: a significant share of its content is AI-generated, the site doesn't disclose that fact, and the layout makes it look like the articles were written by human journalists.\n\nThese sites typically sport generic names like \"Times Business News\" or \"Business Post,\" push out dozens of articles a day, and frequently serve as the origin point for fake news about brands, health topics, politicians, or celebrities.\n\nAd\n\nFake stories hurt brands and fuel geopolitical propaganda\n\nThe lack of editorial oversight means AI regularly generates completely fabricated claims. In October 2025, the AI content farm \"News 24\" published a false report claiming Coca-Cola had threatened to pull its Super Bowl sponsorship if Puerto Rican rapper Bad Bunny performed during the halftime show. Coca-Cola isn't even a Super Bowl sponsor, Newsguard points out. Yet ads from Expedia, AT&T, YouTube, Priceline, Hotels.com, Skechers, and GoDaddy all ran on the site.\n\nMeanwhile, \"CitizenWatchReport\" pushed the false claim that two U.S. senators had blown $814,000 on hotels in Ukraine. Russian state media picked up the story and amplified it inside the U.S.\n\nAd DEC_D_Incontent-2\n\nNewsguard says the system also tracks sites run by adversarial actors from Russia, China, and Iran. Of the identified AI content farms, 358 were tied to Storm-1516, a pro-Russian influence operation that publishes misleading content on websites designed to mimic local newspapers in the U.S. and Europe. The real number is likely much higher, Newsguard noted in an earlier study, since current detection methods aren't perfect.\n\nAd\n\nAdvertisers unknowingly bankroll AI content farms\n\nMany of the flagged sites are so-called \"made for advertising\" pages, built specifically to siphon off programmatic ad dollars with low-quality content. Newsguard previously reported that 141 well-known brands ran ads on these kinds of sites over a two-month stretch.\n\nThe new data feed is designed to help advertisers keep their placements off these sites. It plugs into buying platforms like The Trade Desk or can be licensed directly by brands and agencies.\n\nAI content farms also surface in Google services like Google News and Google Discover, where they pick up significant visibility. Google apparently can't or won't filter them out. Often, the company likely profits from the ads running on these sites through its own AdSense program.",
-      "id": 2
-    },
-    {
-      "title": "‘Raise a lobster’: como o OpenClaw é a última moda que transforma o setor de IA da China",
-      "url": "https://fortune.com/2026/03/14/openclaw-china-ai-agent-boom-open-source-lobster-craze-minimax-qwen/",
-      "source": "Fortune",
-      "published": "Sat, 14 Mar 2026 21:00:00 +0000",
-      "description_rss": "The OpenClaw craze aligns with China’s embrace of open-source AI, a strategy that has helped build labs’ reputation among the developer community.",
-      "temperature": "warm",
-      "summary": "A mania do OpenClaw se alinha com a adoção da IA ​​de código aberto pela China, uma estratégia que ajudou a construir a reputação dos laboratórios entre a comunidade de desenvolvedores....",
-      "description": "A mania do OpenClaw se alinha com a adoção da IA ​​de código aberto pela China, uma estratégia que ajudou a construir a reputação dos laboratórios entre a comunidade de desenvolvedores....",
-      "id": 3
-    },
-    {
-      "title": "O mercado de trabalho dos EUA está começando a rachar? Steven Rattner sobre tarifas, IA e estagflação",
-      "url": "https://www.bloomberg.com/news/videos/2026-03-14/rattner-cooling-jobs-market-tariffs-and-ai-video",
-      "source": "Bloomberg Tech",
-      "published": "Sat, 14 Mar 2026 12:03:23 GMT",
-      "description_rss": "The latest jobs data is pointing to a softer US labor market, even as overall economic conditions have remained relatively solid. Steven Rattner of Willett Advisers unpacks what is driving that disconnect, why tariffs may be adding pressure on employers, how AI is already influencing hiring decisions, and why the combination of forces could create a challenge for the Fed and for investors.\n (Source: Bloomberg)",
-      "temperature": "cold",
-      "summary": "Os dados mais recentes sobre o emprego apontam para um mercado de trabalho mais fraco nos EUA, apesar de as condições económicas globais terem permanecido relativamente sólidas. Steven Rattner, da Willett Advisers, revela o que está causando essa desconexão e por que as tarifas podem estar aumentando a pressão sobre o emprego...",
-      "description": "Os dados mais recentes sobre o emprego apontam para um mercado de trabalho mais fraco nos EUA, apesar de as condições económicas globais terem permanecido relativamente sólidas. Steven Rattner, da Willett Advisers, revela o que está causando essa desconexão e por que as tarifas podem estar aumentando a pressão sobre o emprego...",
-      "id": 4
+      "id": 1
     },
     {
       "title": "Meta supostamente está considerando demissões que podem afetar 20% da empresa",
@@ -60,6 +25,39 @@
       "summary": "Em resumo\n\nA Meta está considerando grandes demissões que poderiam afetar 20% ou mais da força de trabalho da empresa, segundo a Reuters.\n\nEssas demissões poderiam ajudar a controladora do Facebook a compensar seus gastos agressivos em infraestrutura de IA, bem como em...",
       "description": "Em resumo\n\nA Meta está considerando grandes demissões que poderiam afetar 20% ou mais da força de trabalho da empresa, segundo a Reuters.\n\nEssas demissões poderiam ajudar a controladora do Facebook a compensar seus gastos agressivos em infraestrutura de IA, bem como em...",
       "original_text": "In Brief\n\nMeta is considering major layoffs that could affect 20% or more of the company’s workforce, according to Reuters.\n\nThese layoffs could help the Facebook parent company offset its aggressive spending on AI infrastructure, as well as AI-related acquisitions and hiring. Meta employed nearly 79,000 people as of December 31, according to a recent filing.\n\n“This is speculative reporting about theoretical approaches,” a Meta spokesperson said in a statement.\n\nThe report comes as many tech companies — most recently Block — have announced sweeping layoffs that they say are necessary as AI automates more work. But some pundits, and even executives like OpenAI’s Sam Altman, have suggested that many of these cuts are “AI-washing,” where executives use AI as cover for other issues, such as over-hiring during the pandemic.\n\nThe last time Meta announced layoffs of this scale was in November 2022, when it cut 11,000 jobs, followed by another 10,000 in March 2023.",
+      "id": 2
+    },
+    {
+      "title": "O mercado de trabalho dos EUA está começando a rachar? Steven Rattner sobre tarifas, IA e estagflação",
+      "url": "https://www.bloomberg.com/news/videos/2026-03-14/rattner-cooling-jobs-market-tariffs-and-ai-video",
+      "source": "Bloomberg Tech",
+      "published": "Sat, 14 Mar 2026 12:03:23 GMT",
+      "description_rss": "The latest jobs data is pointing to a softer US labor market, even as overall economic conditions have remained relatively solid. Steven Rattner of Willett Advisers unpacks what is driving that disconnect, why tariffs may be adding pressure on employers, how AI is already influencing hiring decisions, and why the combination of forces could create a challenge for the Fed and for investors.\n (Source: Bloomberg)",
+      "temperature": "warm",
+      "summary": "Os dados mais recentes sobre o emprego apontam para um mercado de trabalho mais fraco nos EUA, apesar de as condições económicas globais terem permanecido relativamente sólidas. Steven Rattner, da Willett Advisers, revela o que está causando essa desconexão e por que as tarifas podem estar aumentando a pressão sobre o emprego...",
+      "description": "Os dados mais recentes sobre o emprego apontam para um mercado de trabalho mais fraco nos EUA, apesar de as condições económicas globais terem permanecido relativamente sólidas. Steven Rattner, da Willett Advisers, revela o que está causando essa desconexão e por que as tarifas podem estar aumentando a pressão sobre o emprego...",
+      "id": 3
+    },
+    {
+      "title": "‘Raise a lobster’: como o OpenClaw é a última moda que transforma o setor de IA da China",
+      "url": "https://fortune.com/2026/03/14/openclaw-china-ai-agent-boom-open-source-lobster-craze-minimax-qwen/",
+      "source": "Fortune",
+      "published": "Sat, 14 Mar 2026 21:00:00 +0000",
+      "description_rss": "The OpenClaw craze aligns with China’s embrace of open-source AI, a strategy that has helped build labs’ reputation among the developer community.",
+      "temperature": "cold",
+      "summary": "A mania do OpenClaw se alinha com a adoção da IA ​​de código aberto pela China, uma estratégia que ajudou a construir a reputação dos laboratórios entre a comunidade de desenvolvedores....",
+      "description": "A mania do OpenClaw se alinha com a adoção da IA ​​de código aberto pela China, uma estratégia que ajudou a construir a reputação dos laboratórios entre a comunidade de desenvolvedores....",
+      "id": 4
+    },
+    {
+      "title": "Moonshot, startup de IA da China, obtém fundos com avaliação de US$ 18 bilhões",
+      "url": "https://www.bloomberg.com/news/articles/2026-03-14/china-ai-startup-moonshot-snags-funds-at-18-billion-valuation",
+      "source": "Bloomberg Tech",
+      "published": "Sat, 14 Mar 2026 09:35:20 GMT",
+      "description_rss": "Moonshot AI is seeking to raise as much as $1 billion in an expanded funding round that would value the startup at about $18 billion, more than quadrupling its valuation in just three months and underscoring growing interest in Chinese AI developers racing to rival Silicon Valley leaders.",
+      "temperature": "warm",
+      "summary": "Moonshot AI está tentando levantar até US$ 1 bilhão em uma rodada de financiamento ampliada que avaliaria a startup em cerca de US$ 18 bilhões, mais do que quadruplicando sua avaliação em apenas três meses e ressaltando o interesse crescente em desenvolvedores chineses de IA.",
+      "description": "Moonshot AI está tentando levantar até US$ 1 bilhão em uma rodada de financiamento ampliada que avaliaria a startup em cerca de US$ 18 bilhões, mais do que quadruplicando sua avaliação em apenas três meses e ressaltando o interesse crescente em desenvolvedores chineses de IA.",
       "id": 5
     },
     {
@@ -76,14 +74,16 @@
       "id": 6
     },
     {
-      "title": "Moonshot, startup de IA da China, obtém fundos com avaliação de US$ 18 bilhões",
-      "url": "https://www.bloomberg.com/news/articles/2026-03-14/china-ai-startup-moonshot-snags-funds-at-18-billion-valuation",
-      "source": "Bloomberg Tech",
-      "published": "Sat, 14 Mar 2026 09:35:20 GMT",
-      "description_rss": "Moonshot AI is seeking to raise as much as $1 billion in an expanded funding round that would value the startup at about $18 billion, more than quadrupling its valuation in just three months and underscoring growing interest in Chinese AI developers racing to rival Silicon Valley leaders.",
-      "temperature": "warm",
-      "summary": "Moonshot AI está tentando levantar até US$ 1 bilhão em uma rodada de financiamento ampliada que avaliaria a startup em cerca de US$ 18 bilhões, mais do que quadruplicando sua avaliação em apenas três meses e ressaltando o interesse crescente em desenvolvedores chineses de IA.",
-      "description": "Moonshot AI está tentando levantar até US$ 1 bilhão em uma rodada de financiamento ampliada que avaliaria a startup em cerca de US$ 18 bilhões, mais do que quadruplicando sua avaliação em apenas três meses e ressaltando o interesse crescente em desenvolvedores chineses de IA.",
+      "title": "China promove \"empresas individuais\" do OpenClaw com milhões em subsídios para agentes de IA",
+      "url": "https://the-decoder.com/china-pushes-openclaw-one-person-companies-with-millions-in-ai-agent-subsidies/",
+      "source": "The Decoder",
+      "published": "Sat, 14 Mar 2026 12:19:26 +0000",
+      "description_rss": "<p><img alt=\"\" class=\"attachment-full size-full wp-post-image\" height=\"768\" src=\"https://the-decoder.com/wp-content/uploads/2026/03/china_open-Claw.png\" style=\"height: auto; margin-bottom: 10px;\" width=\"1376\" /></p>\n<p>        At least seven Chinese local governments have launched million-dollar funding programs for OpenClaw projects within days. The goal: \"one-person companies\" where a single founder runs a business with AI agents as employees.</p>\n<p>The article <a href=\"https://the-decoder.com/china-pushes-openclaw-one-person-companies-with-millions-in-ai-agent-subsidies/\">China pushes OpenClaw &quot;one-person companies&quot; with millions in AI agent subsidies</a> appeared first on <a href=\"https://the-decoder.com\">The Decoder</a>.</p>",
+      "temperature": "cold",
+      "extracted_title": "China pushes OpenClaw \"one-person companies\" with millions in AI agent subsidies",
+      "summary": "O entusiasmo dos agentes de IA em torno do OpenClaw atingiu duramente a China. Pelo menos sete governos locais implementaram programas de financiamento em poucos dias, informa o SCMP. O ritmo sugere que Pequim vê os agentes de IA construídos em OpenClaw e estruturas semelhantes como um impulso potencial...",
+      "description": "O entusiasmo dos agentes de IA em torno do OpenClaw atingiu duramente a China. Pelo menos sete governos locais implementaram programas de financiamento em poucos dias, informa o SCMP. O ritmo sugere que Pequim vê os agentes de IA construídos em OpenClaw e estruturas semelhantes como um impulso potencial...",
+      "original_text": "The AI agent hype around OpenClaw has hit China hard. At least seven local governments rolled out funding programs within days, SCMP reports. The sheer pace suggests Beijing sees AI agents built on OpenClaw and similar frameworks as a potential driver for economic growth.\n\nHefei's tech district in Anhui province is offering up to 1.4 million dollars in subsidies for housing, offices, and computing power, partly to promote \"one-person companies\" where a single founder works with AI agents as employees. Shenzhen matched with up to 1.4 million dollars, Wuxi with around 700,000 dollars plus computing resources, Changshu with roughly 830,000 dollars, and Changzhou with about 700,000 dollars plus an extra 280,000 dollars for computing power. Nanjing is providing free office space and computing resources.\n\n\"Having AI work for [users], taking care of tasks on their behalf, offers an experience that goes beyond mere talk surrounding the technology,\" says Li Zhi, head of the Intelligent Institute at Analysys International. \"It has tapped into a social sentiment and vision of productivity, ultimately fueling a nationwide craze that has swept up everyone, from tech geeks to ordinary users.\"\n\nAd DEC_D_Incontent-1",
       "id": 7
     }
   ]
