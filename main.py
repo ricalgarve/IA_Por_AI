@@ -1,10 +1,10 @@
 import os
 from fastapi import FastAPI, Request, HTTPException, Security, Depends
 from fastapi.security.api_key import APIKeyHeader
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from core.news_service import get_latest_news
-from core.db_util import load_news_from_json, save_news_to_json
+from core.db_util import load_news_from_db, save_news_to_db
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -23,7 +23,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(BASE_DIR, "templates")
 templates = Jinja2Templates(directory=templates_dir)
 
+from fastapi.staticfiles import StaticFiles
 
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 from dateutil.parser import parse as date_parse
 from datetime import datetime
@@ -31,26 +33,14 @@ from typing import Optional
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, date: Optional[str] = None):
-    # Lemos os dados salvos pelo Cron ou da sessão anterior da Lambda
-    cached_news = load_news_from_json()
-    
-    # FALLBACK DE EMERGÊNCIA (Obrigatório para Vercel Free Tier):
-    # As funções da Vercel "esquecem" arquivos de sua pasta /tmp depois de algumas horas de inatividade. 
-    # Se o primeiro visitante do dia acessar antes do fluxo cron rodar, fazemos a primeira carga sob demanda!
-    if not cached_news:
-        try:
-            cached_news = get_latest_news()
-            if cached_news:
-                save_news_to_json(cached_news)
-        except Exception as e:
-            cached_news = []
-            print(f"Erro na carga ao vivo: {e}")
+    # Sempre resgata as notícias diretamente do banco de dados (Supabase)
+    db_news = load_news_from_db()
             
     # Processar datas
     available_dates = set()
     parsed_news = []
     
-    for item in cached_news:
+    for item in db_news:
         pub_str = item.get("published", "")
         extracted_date_str = None
         if pub_str:
@@ -95,6 +85,22 @@ async def home(request: Request, date: Optional[str] = None):
     })
 
 import traceback
+from pydantic import BaseModel
+
+class NewsletterSub(BaseModel):
+    email: str
+
+@app.post("/api/newsletter/subscribe")
+async def api_subscribe_newsletter(sub: NewsletterSub):
+    try:
+        from core.db_util import subscribe_newsletter
+        success = subscribe_newsletter(sub.email)
+        if success:
+            return {"status": "success", "message": "Inscrição realizada com sucesso!"}
+        else:
+            return {"status": "info", "message": "Este e-mail já está inscrito."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/cron/update-news")
 async def force_update_news(api_key: str = Depends(verify_cron_secret)):
@@ -106,9 +112,9 @@ async def force_update_news(api_key: str = Depends(verify_cron_secret)):
         # A API roda o maestro demorado aqui embaixo dos panos
         new_articles = get_latest_news()
         
-        # O Maestro retornou? Salva por cima no JSON
+        # O Maestro retornou? Salva por cima no DB
         if new_articles:
-            save_news_to_json(new_articles)
+            save_news_to_db(new_articles)
             return {"status": "success", "message": f"{len(new_articles)} notícias atualizadas de forma offline."}
         else:
             return {"status": "error", "message": "Nenhuma notícia foi extraída das fontes."}

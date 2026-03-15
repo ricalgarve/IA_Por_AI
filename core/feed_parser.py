@@ -46,7 +46,7 @@ import re
 
 AI_KEYWORDS = [
     r'\bai\b', r'artificial intelligence', r'inteligência artificial', r'\bllm\b', r'chatgpt',
-    r'openai', r'gemini', r'anthropic', r'claude', r'machine learning', r'deep learning', r'midjourney'
+    r'openai', r'gemini', r'anthropic', r'claude', r'machine learning', r'deep learning', r'midjourney', r'deepseek', r'ollama'
 ]
 AI_PATTERN = re.compile('|'.join(AI_KEYWORDS), re.IGNORECASE)
 

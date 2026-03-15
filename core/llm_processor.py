@@ -81,3 +81,29 @@ def summarize_text_with_llm(text: str) -> str:
         return text[:250] + "..."
     
     return resumo.strip()
+
+def check_semantic_duplicate_with_llm(new_title: str, new_summary: str, existing_titles: list) -> bool:
+    """
+    Verifica se a nova notícia já existe na base do dia atual, comparando com os títulos 
+    das notícias já cadastradas usando um modelo de IA como juiz.
+    """
+    if not existing_titles or not USE_LLM:
+        return False
+        
+    titles_text = "\n".join([f"- {t}" for t in existing_titles])
+    
+    system_prompt = "Você é um juiz avaliador de similaridade de textos. O usuário te enviará as manchetes do dia e uma NOVA notícia. Se a NOVA notícia se referir exatamente ao mesmo evento, assunto principal ou lançamento de alguma das manchetes já presentes na lista, você DEVE responder apenas 'SIM'. Caso seja uma notícia genuinamente nova e diferente, responda apenas 'NAO'. Não adicione justificativas."
+    
+    user_prompt = f"MANCHETES JÁ EXISTENTES DE HOJE:\n{titles_text}\n\nNOVA NOTÍCIA A AVALIAR:\nTítulo: {new_title}\nResumo: {new_summary}\n\nEssa nova notícia retrata o mesmo evento de alguma das manchetes acima? Responda SIM ou NAO."
+    
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+    
+    response = call_openrouter(messages)
+    
+    if response and "SIM" in response.upper() and ("NAO" not in response.upper() or response.upper().index("SIM") < response.upper().index("NAO")):
+        return True
+        
+    return False

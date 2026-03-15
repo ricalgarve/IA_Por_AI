@@ -8,3 +8,5 @@ requests
 pygooglenews
 deep-translator
 python-dateutil
+python-dotenv
+supabase
