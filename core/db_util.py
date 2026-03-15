@@ -85,13 +85,24 @@ def save_news_to_db(news_list: list):
                 
             pub_str = item.get("published", "")
             data_noticia = None
+            skip_old_news = False
+            
             if pub_str:
                 from dateutil.parser import parse as date_parse
                 try:
                     dt = date_parse(pub_str)
+                    dt_str = dt.strftime("%Y-%m-%d")
+                    # Ignorar notícias de dias anteriores
+                    if dt_str < current_date_str:
+                        skip_old_news = True
                     data_noticia = dt.isoformat()
                 except Exception:
                     pass
+            
+            if skip_old_news:
+                titulo_log = item.get("title", "Sem Título")
+                logging.info(f"Ignorando notícia antiga ({pub_str}): {titulo_log}")
+                continue
             
             if not data_noticia:
                 data_noticia = datetime.now().isoformat()
