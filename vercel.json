@@ -14,23 +14,23 @@
   "crons": [
     {
       "path": "/api/cron/update-news",
-      "schedule": "0 2 * * *"
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/update-news",
-      "schedule": "0 9 * * *"
+      "schedule": "0 15 * * *"
     },
     {
       "path": "/api/cron/update-news",
-      "schedule": "2 16 * * *"
+      "schedule": "8 22 * * *"
     },
     {
       "path": "/api/cron/update-news",
-      "schedule": "0 19 * * *"
+      "schedule": "0 1 * * *"
     },
     {
       "path": "/api/cron/send-newsletter",
-      "schedule": "0 3 * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }
