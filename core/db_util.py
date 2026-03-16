@@ -53,6 +53,68 @@ def load_news_from_db() -> list:
         logging.error(f"Erro lendo do Supabase: {e}")
         return []
 
+def get_available_dates() -> list[str]:
+    """Retorna lista de datas distintas (YYYY-MM-DD) que possuem notícias, ordenadas em ordem decrescente"""
+    supabase = get_supabase()
+    if not supabase:
+        logging.error("Supabase não configurado. Adicione SUPABASE_URL e SUPABASE_KEY.")
+        return []
+    
+    try:
+        # Busca todas as notícias com apenas o campo data_noticia
+        response = supabase.table("noticias").select("data_noticia").execute()
+        
+        # Extrai as datas únicas em formato YYYY-MM-DD
+        dates_set = set()
+        for row in response.data:
+            dt_str = row.get("data_noticia", "")
+            if dt_str:
+                try:
+                    # Extrai apenas a data (YYYY-MM-DD) do timestamp
+                    date_only = dt_str[:10]  # Pega os primeiros 10 caracteres
+                    dates_set.add(date_only)
+                except Exception:
+                    pass
+        
+        # Retorna as datas ordenadas em ordem decrescente (mais recentes primeiro)
+        return sorted(list(dates_set), reverse=True)
+    except Exception as e:
+        logging.error(f"Erro ao buscar datas disponíveis: {e}")
+        return []
+
+def load_news_by_date(date_str: str) -> list:
+    """Carrega todas as notícias de uma data específica (YYYY-MM-DD), ordenadas da mais recente"""
+    supabase = get_supabase()
+    if not supabase:
+        logging.error("Supabase não configurado. Adicione SUPABASE_URL e SUPABASE_KEY.")
+        return []
+    
+    try:
+        # Cria os limites do dia (00:00:00 até 23:59:59.999999)
+        start_of_day = f"{date_str}T00:00:00"
+        end_of_day = f"{date_str}T23:59:59.999999"
+        
+        # Busca todas as notícias nesse intervalo de data
+        response = supabase.table("noticias").select("*").gte("data_noticia", start_of_day).lte("data_noticia", end_of_day).order("data_noticia", desc=True).execute()
+        
+        news = []
+        for row in response.data:
+            dt_str = row.get("data_noticia")
+            news.append({
+                "id": row.get("id"),
+                "title": row.get("titulo"),
+                "description": row.get("resumo"),
+                "summary": row.get("resumo"), # retrocompatível
+                "temperature": map_int_to_temp(row.get("temperatura", 1)),
+                "source": row.get("fonte"),
+                "url": row.get("url"),
+                "published": dt_str
+            })
+        return news
+    except Exception as e:
+        logging.error(f"Erro ao buscar notícias para a data {date_str}: {e}")
+        return []
+
 def save_news_to_db(news_list: list) -> tuple[int, list]:
     """Grava as notícias no Supabase, evitando duplicatas por URL e por semântica (LLM) no mesmo dia"""
     supabase = get_supabase()

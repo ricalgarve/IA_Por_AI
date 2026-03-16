@@ -68,6 +68,114 @@
                 sourceLink.classList.remove('flex');
             }
         }
+
+        async function loadNewsByDate(dateStr) {
+            if (!dateStr) return;
+
+            const preloader = document.getElementById('preloader');
+            const newsList = document.getElementById('news-list');
+
+            // Mostra preloader
+            preloader.classList.remove('hidden');
+            newsList.style.opacity = '0.5';
+            newsList.style.pointerEvents = 'none';
+
+            try {
+                const response = await fetch(`/api/news/by-date/${dateStr}`);
+                if (!response.ok) throw new Error('Erro ao buscar notícias');
+
+                const data = await response.json();
+                
+                // Renderiza as notícias
+                renderNews(data.news, dateStr);
+                
+                // Log da ação
+                sendLog('filtro_data', null);
+            } catch (error) {
+                console.error('Erro ao carregar notícias:', error);
+                alert('Erro ao carregar notícias. Tente novamente.');
+            } finally {
+                // Esconde preloader
+                preloader.classList.add('hidden');
+                newsList.style.opacity = '1';
+                newsList.style.pointerEvents = 'auto';
+            }
+        }
+
+        function renderNews(news, dateStr) {
+            const newsList = document.getElementById('news-list');
+            
+            // Atualiza o título da data (apenas o h2 dentro da div de filtro)
+            const dateDisplay = document.querySelector('.flex.flex-col.gap-1 h2');
+            if (dateDisplay) {
+                const [year, month, day] = dateStr.split('-');
+                dateDisplay.innerHTML = `<span class="material-symbols-outlined text-primary text-xl">calendar_today</span> Notícias de ${day}/${month}/${year}`;
+            }
+
+            if (!news || news.length === 0) {
+                newsList.innerHTML = '<div class="py-8 text-center text-slate-500">Nenhuma notícia encontrada para esta data.</div>';
+                return;
+            }
+
+            let html = '';
+            news.forEach(item => {
+                const tempClass = item.temperature === 'hot' ? 'text-red-500' : 
+                                item.temperature === 'warm' ? 'text-orange-400' : 'text-blue-400';
+                const publishedTime = item.published ? item.published.substring(0, 16) : '';
+                
+                html += `
+                    <div class="group border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all duration-300 bg-transparent py-4 border-b cursor-pointer relative"
+                        onclick="toggleNews(${item.id})">
+                        <div class="flex flex-col md:flex-row gap-3 pl-4 pr-2">
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-start mb-1 gap-2">
+                                        <div class="shrink-0 mt-0.5">
+                                            <span class="material-symbols-outlined text-[18px] ${tempClass}">speed</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="font-mono font-bold dark:text-gray-100 leading-snug group-hover:text-primary transition-colors text-base">
+                                                ${item.title}
+                                            </h3>
+                                            ${publishedTime ? `<p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">schedule</span>${publishedTime}</p>` : ''}
+                                        </div>
+                                    </div>
+                                    <p id="desc-${item.id}"
+                                        class="text-slate-500 dark:text-slate-400 text-xs line-clamp-1 leading-relaxed transition-all duration-300">
+                                        ${item.description}
+                                    </p>
+                                </div>
+                                <div id="source-link-${item.id}"
+                                    class="hidden items-center justify-between mt-3 mb-2 pt-3 border-t border-slate-100 dark:border-slate-800/50">
+                                    <span class="text-[10px] md:text-xs text-slate-500 flex items-center flex-wrap gap-2">
+                                        <span class="material-symbols-outlined text-[14px]">public</span> Fonte: ${item.source}
+                                        ${publishedTime ? `<span class="material-symbols-outlined text-[14px]">schedule</span>${publishedTime}` : ''}
+                                    </span>
+                                    <div class="flex items-center gap-3">
+                                        <a href="https://translate.google.com/translate?sl=auto&tl=pt&u=${encodeURIComponent(item.url)}" target="_blank" onclick="event.stopPropagation(); sendLog('acessar_noticia_traduzida', ${item.id});"
+                                            class="text-[11px] md:text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:underline flex items-center gap-1">
+                                            Ler Traduzida <span class="material-symbols-outlined text-[14px]">translate</span>
+                                        </a>
+                                        <a href="${item.url}" target="_blank" onclick="event.stopPropagation(); sendLog('acessar_noticia_completa', ${item.id});"
+                                            class="text-[11px] md:text-xs font-semibold text-primary hover:text-blue-400 hover:underline flex items-center gap-1">
+                                            Acessar Original <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end justify-center">
+                                <button class="flex items-center text-slate-400 group-hover:text-primary transition-colors h-full px-2">
+                                    <span class="sr-only">Ler mais</span>
+                                    <span id="btn-icon-${item.id}" class="material-symbols-outlined text-lg transition-transform duration-300">expand_more</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            newsList.innerHTML = html;
+        }
     </script>
     <style>
         body {
@@ -162,38 +270,44 @@
                 </div>
             </div> -->
 
-            {% if available_dates %}
             <!-- News List Header & Filter -->
             <div class="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
                 <div class="flex flex-col gap-1">
                     <h2 class="text-xl font-bold dark:text-gray-100 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-xl">calendar_today</span> 
-                        Notícias de 
-                        {% if selected_date %}
-                            {{ selected_date[8:10] }}/{{ selected_date[5:7] }}/{{ selected_date[0:4] }}
-                        {% endif %}
+                        Notícias{% if selected_date %} de {{ selected_date[8:10] }}/{{ selected_date[5:7] }}/{{ selected_date[0:4] }}{% endif %}
                     </h2>
                     {% if last_update %}
                     <p class="text-xs text-slate-500 dark:text-slate-400 font-mono ml-8">&bull; Última extração bem sucedida: {{ last_update }}</p>
                     {% endif %}
                 </div>
-                <div class="mt-4 sm:mt-0 relative group">
-                    <form action="/" method="GET" class="flex items-center gap-2">
-                        <label for="date_filter" class="text-sm text-slate-500 dark:text-slate-400">Filtrar por data:</label>
-                        <select name="date" id="date_filter" onchange="this.form.submit()" class="bg-slate-100 px-3 py-2  dark:bg-slate-800/50 border-none rounded-xl focus:ring-2 focus:ring-primary/50 text-sm transition-all outline-none font-medium dark:text-slate-200 cursor-pointer">
-                            {% for available in available_dates %}
-                            <option value="{{ available }}" {% if available == selected_date %}selected{% endif %}>
-                                {{ available[8:10] }}/{{ available[5:7] }}/{{ available[0:4] }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </form>
+                {% if available_dates %}
+                <div class="mt-4 sm:mt-0 relative group flex items-center gap-2">
+                    <label for="date_filter" class="text-sm text-slate-500 dark:text-slate-400">Filtrar por data:</label>
+                    <select id="date_filter" onchange="loadNewsByDate(this.value)" class="bg-slate-100 px-3 py-2 dark:bg-slate-800/50 border-none rounded-xl focus:ring-2 focus:ring-primary/50 text-sm transition-all outline-none font-medium dark:text-slate-200 cursor-pointer">
+                        {% for available in available_dates %}
+                        <option value="{{ available }}" {% if available == selected_date %}selected{% endif %}>
+                            {{ available[8:10] }}/{{ available[5:7] }}/{{ available[0:4] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Preloader -->
+            <div id="preloader" class="hidden fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 flex flex-col items-center gap-4">
+                    <div class="relative w-12 h-12">
+                        <div class="absolute inset-0 rounded-full border-4 border-slate-200 dark:border-slate-700"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-300 font-medium">Carregando notícias...</p>
                 </div>
             </div>
-            {% endif %}
 
             <!-- News List -->
-            <div class="space-y-0 border-t border-slate-200 dark:border-slate-800">
+            <div id="news-list" class="space-y-0 border-t border-slate-200 dark:border-slate-800">
                 {% for item in news %}
                 <div class="group border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all duration-300 bg-transparent py-4 border-b cursor-pointer relative"
                     onclick="toggleNews({{ item.id }})">
@@ -211,9 +325,11 @@
                                             speed
                                         </span>
                                     </div>
-                                    <h3
-                                        class="font-mono font-bold dark:text-gray-100 leading-snug group-hover:text-primary transition-colors text-base flex-1">
-                                        {{ item.title }}</h3>
+                                    <div class="flex-1">
+                                        <h3 class="font-mono font-bold dark:text-gray-100 leading-snug group-hover:text-primary transition-colors text-base">
+                                            {{ item.title }}</h3>
+                                        {% if item.published %}<p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">schedule</span>{{ item.published[:16] }}</p>{% endif %}
+                                    </div>
                                 </div>
                                 <p id="desc-{{ item.id }}"
                                     class="text-slate-500 dark:text-slate-400 text-xs line-clamp-1 leading-relaxed transition-all duration-300">
@@ -224,9 +340,9 @@
                             <!-- Expandable Links area that shows up when expanding -->
                             <div id="source-link-{{ item.id }}"
                                 class="hidden items-center justify-between mt-3 mb-2 pt-3 border-t border-slate-100 dark:border-slate-800/50">
-                                <span class="text-[10px] md:text-xs text-slate-500 flex items-center"><span
-                                        class="material-symbols-outlined text-[14px] mr-1">public</span> Fonte: {{
-                                    item.source }}{% if item.published %} &nbsp;&bull;&nbsp; {{ item.published[:16] }}{% endif %}</span>
+                                <span class="text-[10px] md:text-xs text-slate-500 flex items-center flex-wrap gap-2"><span
+                                        class="material-symbols-outlined text-[14px]">public</span> Fonte: {{
+                                    item.source }}{% if item.published %}<span class="material-symbols-outlined text-[14px]">schedule</span>{{ item.published[:16] }}{% endif %}</span>
                                 <div class="flex items-center gap-3">
                                     {% if item.source in ['TechCrunch', 'Ars Technica', 'Business Insider', 'The Guardian AI', 'Fortune', 'The Decoder', 'Bloomberg Tech'] %}
                                     <a href="https://translate.google.com/translate?sl=auto&tl=pt&u={{ item.url }}" target="_blank" onclick="event.stopPropagation(); sendLog('acessar_noticia_traduzida', {{ item.id }});"

@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import FastAPI, Request, HTTPException, Security, Depends
 from fastapi.security.api_key import APIKeyHeader
 from fastapi.responses import HTMLResponse, FileResponse
@@ -33,11 +34,23 @@ from typing import Optional
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, date: Optional[str] = None):
-    # Sempre resgata as notícias diretamente do banco de dados (Supabase)
-    db_news = load_news_from_db()
-            
-    # Processar datas
-    available_dates = set()
+    # Busca as datas disponíveis (DISTINCT da base de dados)
+    from core.db_util import get_available_dates, load_news_by_date
+    dates_list = get_available_dates()
+    
+    # Se uma data foi selecionada, carrega as notícias daquele dia específico
+    if date and date in dates_list:
+        selected_date = date
+        db_news = load_news_by_date(selected_date)
+    elif dates_list:
+        # Caso contrário, usa o dia mais recente
+        selected_date = dates_list[0]
+        db_news = load_news_by_date(selected_date)
+    else:
+        selected_date = None
+        db_news = load_news_from_db()
+    
+    # Processar notícias
     parsed_news = []
     
     for item in db_news:
@@ -48,34 +61,20 @@ async def home(request: Request, date: Optional[str] = None):
                 # Extraindo o objeto data do string RFC ou qualquer que for o RSS
                 dt = date_parse(pub_str)
                 extracted_date_str = dt.strftime("%Y-%m-%d")
-                
-                # Ignorar notícias antes de 14/03/2026
-                if extracted_date_str < "2026-03-14":
-                    continue
-                    
-                available_dates.add(extracted_date_str)
-            except Exception:
-                pass
+            except Exception as e:
+                logging.warning(f"Erro ao parsear data '{pub_str}': {e}")
+                # Se não conseguir extrair data, usa a data de hoje
+                extracted_date_str = datetime.now().strftime("%Y-%m-%d")
+        else:
+            # Se não tem data publicada, usa a de hoje
+            extracted_date_str = datetime.now().strftime("%Y-%m-%d")
         
         # Guardaremos a string no próprio objeto pelo menos pra facilitar a UI
         item["extracted_date"] = extracted_date_str
         parsed_news.append(item)
-        
-    dates_list = sorted(list(available_dates), reverse=True)
     
-    # Se na barra de pesquisa for passada uma query ?date=...
-    if date and date in dates_list:
-        selected_date = date
-    elif dates_list:
-        selected_date = dates_list[0] # Default é o dia mais novo
-    else:
-        selected_date = None
-        
-    # Filtrar o payload pras noticias apenas do Selected Date
-    if selected_date:
-        filtered_news = [n for n in parsed_news if n.get("extracted_date") == selected_date]
-    else:
-        filtered_news = parsed_news
+    # Todas as notícias carregadas são da data selecionada
+    filtered_news = parsed_news
         
     try:
         from core.db_util import log_interaction
@@ -124,6 +123,19 @@ async def api_subscribe_newsletter(sub: NewsletterSub):
         else:
             return {"status": "info", "message": "Este e-mail já está inscrito."}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/news/by-date/{date_str}")
+async def api_get_news_by_date(date_str: str):
+    """
+    Retorna as notícias de uma data específica em formato JSON
+    """
+    try:
+        from core.db_util import load_news_by_date
+        news = load_news_by_date(date_str)
+        return {"status": "success", "news": news}
+    except Exception as e:
+        logging.error(f"Erro ao buscar notícias para {date_str}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/cron/update-news")
