@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/update-news",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/send-newsletter",
+      "schedule": "5 9 * * *"
     }
   ]
 }
