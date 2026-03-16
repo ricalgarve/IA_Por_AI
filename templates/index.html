@@ -102,6 +102,17 @@
             }
         }
 
+        function getReadableUrl(url, source) {
+            // Bloomberg Brasil tem o mesmo conteúdo em português
+            if (source === 'Bloomberg' || url.includes('bloomberg.com')) {
+                // Converte URL de Bloomberg en para pt-br
+                return url.replace('bloomberg.com', 'bloomberg.com.br')
+                         .replace('/articles/', '/articles/');
+            }
+            // Para outras fontes, usa Google Translate
+            return `https://translate.google.com/translate?sl=auto&tl=pt&u=${encodeURIComponent(url)}`;
+        }
+
         function renderNews(news, dateStr) {
             const newsList = document.getElementById('news-list');
             
@@ -152,7 +163,7 @@
                                         ${publishedTime ? `<span class="material-symbols-outlined text-[14px]">schedule</span>${publishedTime}` : ''}
                                     </span>
                                     <div class="flex items-center gap-3">
-                                        <a href="https://translate.google.com/translate?sl=auto&tl=pt&u=${encodeURIComponent(item.url)}" target="_blank" onclick="event.stopPropagation(); sendLog('acessar_noticia_traduzida', ${item.id});"
+                                        <a href="javascript:void(0)" onclick="event.stopPropagation(); window.open(getReadableUrl('${item.url}', '${item.source}'), '_blank'); sendLog('acessar_noticia_traduzida', ${item.id});"
                                             class="text-[11px] md:text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:underline flex items-center gap-1">
                                             Ler Traduzida <span class="material-symbols-outlined text-[14px]">translate</span>
                                         </a>
