@@ -92,8 +92,11 @@ async def home(request: Request, date: Optional[str] = None):
         last_update_raw = get_last_successful_update()
         if last_update_raw:
             from dateutil.parser import parse as date_parse
+            from datetime import timedelta
             dt_update = date_parse(last_update_raw)
-            last_update = dt_update.strftime("%d/%m/%Y às %H:%M:%S")
+            # Ajusta para UTC-3 (Brazil)
+            dt_update = dt_update - timedelta(hours=3)
+            last_update = dt_update.strftime("%d/%m/%Y às %H:%M")
         else:
             last_update = None
     except Exception:
