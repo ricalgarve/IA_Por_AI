@@ -196,3 +196,51 @@ def log_interaction(ip: str, acao: str, id_noticia: int | None = None):
         logging.info(f"Log de interação gravado: {acao} para IP {ip}")
     except Exception as e:
         logging.error(f"Erro gravando log na tabela log_interacoes: {e}")
+
+def get_last_successful_update() -> str | None:
+    supabase = get_supabase()
+    if not supabase:
+        return None
+    try:
+        response = supabase.table("log_atualizacoes").select("created_at").eq("sucesso", True).order("created_at", desc=True).limit(1).execute()
+        if response.data:
+            return response.data[0].get("created_at")
+        return None
+    except Exception as e:
+        logging.error(f"Erro ao buscar última atualização: {e}")
+        return None
+
+def get_subscribers() -> list[str]:
+    supabase = get_supabase()
+    if not supabase:
+        return []
+    try:
+        response = supabase.table("newsletter").select("email").execute()
+        return [row["email"] for row in response.data]
+    except Exception as e:
+        logging.error(f"Erro ao buscar assinantes: {e}")
+        return []
+
+def get_yesterdays_news() -> list[dict]:
+    supabase = get_supabase()
+    if not supabase:
+        return []
+    try:
+        from datetime import timedelta
+        yesterday_str = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        start_of_yesterday = f"{yesterday_str}T00:00:00"
+        end_of_yesterday = f"{yesterday_str}T23:59:59.999999"
+        
+        response = supabase.table("noticias").select("*").gte("data_noticia", start_of_yesterday).lte("data_noticia", end_of_yesterday).order("data_noticia", desc=True).execute()
+        news = []
+        for row in response.data:
+            news.append({
+                "title": row.get("titulo"),
+                "description": row.get("resumo"),
+                "url": row.get("url"),
+                "source": row.get("fonte")
+            })
+        return news
+    except Exception as e:
+        logging.error(f"Erro ao buscar notícias de ontem: {e}")
+        return []

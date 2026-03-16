@@ -88,11 +88,24 @@ async def home(request: Request, date: Optional[str] = None):
     except Exception:
         pass
     
+    try:
+        from core.db_util import get_last_successful_update
+        last_update_raw = get_last_successful_update()
+        if last_update_raw:
+            from dateutil.parser import parse as date_parse
+            dt_update = date_parse(last_update_raw)
+            last_update = dt_update.strftime("%d/%m/%Y às %H:%M:%S")
+        else:
+            last_update = None
+    except Exception:
+        last_update = None
+    
     return templates.TemplateResponse("index.html", {
         "request": request, 
         "news": filtered_news,
         "available_dates": dates_list,
-        "selected_date": selected_date
+        "selected_date": selected_date,
+        "last_update": last_update
     })
 
 import traceback
@@ -156,6 +169,31 @@ async def force_update_news(api_key: str = Depends(verify_cron_secret)):
         except Exception as log_error:
             print(f"Erro ao tentar gravar o trace na tabela de log: {log_error}")
             
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/cron/send-newsletter")
+async def send_newsletter_cron(api_key: str = Depends(verify_cron_secret)):
+    """
+    Rota a ser chamada às 6 da manhã. 
+    Busca as pessoas inscritas e dispara as notícias do dia anterior pra elas.
+    """
+    try:
+        from core.db_util import get_subscribers, get_yesterdays_news
+        from core.email_util import send_newsletter_email
+        
+        subs = get_subscribers()
+        news = get_yesterdays_news()
+        
+        success = send_newsletter_email(subs, news)
+        if success:
+            return {"status": "success", "message": f"Newsletter enviada para {len(subs)} assinantes contendo {len(news)} notícias."}
+        else:
+            return {"status": "info", "message": "Nenhum disparo realizado. Pode não haver notícias, assinantes, ou credenciais SMTP ausentes."}
+            
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"ERRO CRÍTICO no envio de Newsletter:\n{error_trace}")
         raise HTTPException(status_code=500, detail=str(e))
 
 class LogInteraction(BaseModel):
