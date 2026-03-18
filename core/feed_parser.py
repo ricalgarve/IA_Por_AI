@@ -13,7 +13,7 @@ DEFAULT_FEEDS = [
         "name": "TechCrunch"
     },
     {
-        "url": "https://feeds.arstechnica.com/arstechnica",
+        "url": "https://feeds.arstechnica.com/arstechnica/technology-lab",
         "name": "Ars Technica"
     },
     {
@@ -35,6 +35,22 @@ DEFAULT_FEEDS = [
     {
         "url": "https://feeds.bloomberg.com/technology/news.rss",
         "name": "Bloomberg Tech"
+    },
+    {
+        "url": "https://venturebeat.com/category/technology/feed",
+        "name": "Venture Beat"
+    },
+    {
+        "url": "https://deepmind.com/blog/feed/basic/",
+        "name": "Deepming Google"
+    },
+    {
+        "url": "https://www.theguardian.com/uk/technology/rss",
+        "name": "The Guardian"
+    },
+    {
+        "url": "https://www.cnbc.com/id/19854910/device/rss/rss.html",
+        "name": "CNBC"
     }
 ]
 
