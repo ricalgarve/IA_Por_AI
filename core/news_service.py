@@ -2,6 +2,9 @@ from typing import List, Dict
 import random
 from . import feed_parser
 from . import article_extractor
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_latest_news() -> List[Dict]:
     """
@@ -18,9 +21,18 @@ def get_latest_news() -> List[Dict]:
         
     # 2. Pega dos sites de base customizáveis
     rss_news = feed_parser.fetch_rss_links(max_per_feed=2)
-    # Define de forma genérica/random por enquanto para dar cara legal no dashboard
-    for n in rss_news:
-        n["temperature"] = random.choice(["warm", "cold"])
+    
+    # 3. Classifica a temperatura das notícias usando IA
+    try:
+        from .llm_processor import classify_temperature_with_llm
+        titles = [n.get("title", "") for n in rss_news]
+        temperatures = classify_temperature_with_llm(titles)
+        for n, temp in zip(rss_news, temperatures):
+            n["temperature"] = temp
+    except Exception as e:
+        logger.warning(f"Erro ao classificar temperaturas com IA, usando 'cold' como padrão: {e}")
+        for n in rss_news:
+            n["temperature"] = "cold"
         
     # 3. Une todas as listas e prepara para extração
     combined_base_news = rss_news

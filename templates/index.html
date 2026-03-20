@@ -143,8 +143,8 @@
 
             let html = '';
             news.forEach(item => {
-                const tempClass = item.temperature === 'hot' ? 'text-red-500' : 
-                                item.temperature === 'warm' ? 'text-orange-400' : 'text-blue-400';
+                const tempLevel = item.temperature === 'hot' ? 'hot' : item.temperature === 'warm' ? 'warm' : 'cold';
+                const tempTitle = item.temperature === 'hot' ? 'Quente' : item.temperature === 'warm' ? 'Morna' : 'Fria';
                 const publishedTime = item.published ? formatDateBR(item.published) : '';
                 
                 html += `
@@ -154,8 +154,8 @@
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
                                     <div class="flex items-start mb-1 gap-2">
-                                        <div class="shrink-0 mt-0.5">
-                                            <span class="material-symbols-outlined text-[18px] ${tempClass}">speed</span>
+                                        <div class="shrink-0 mt-1" title="${tempTitle}">
+                                            <div class="signal-bars signal-${tempLevel}"><span></span><span></span><span></span></div>
                                         </div>
                                         <div class="flex-1">
                                             <h3 class="font-mono font-bold dark:text-gray-100 leading-snug group-hover:text-primary transition-colors text-base">
@@ -213,6 +213,39 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        /* Signal bars - estilo sinal de celular */
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 16px;
+            width: 18px;
+        }
+        .signal-bars span {
+            display: block;
+            width: 4px;
+            border-radius: 1px;
+            transition: background-color 0.3s;
+        }
+        .signal-bars span:nth-child(1) { height: 5px; }
+        .signal-bars span:nth-child(2) { height: 10px; }
+        .signal-bars span:nth-child(3) { height: 16px; }
+
+        /* cold = 1 barra preenchida (azul) */
+        .signal-cold span:nth-child(1) { background: #60a5fa; }
+        .signal-cold span:nth-child(2) { background: #334155; }
+        .signal-cold span:nth-child(3) { background: #334155; }
+
+        /* warm = 2 barras preenchidas (laranja) */
+        .signal-warm span:nth-child(1) { background: #fb923c; }
+        .signal-warm span:nth-child(2) { background: #fb923c; }
+        .signal-warm span:nth-child(3) { background: #334155; }
+
+        /* hot = 3 barras preenchidas (vermelho) */
+        .signal-hot span:nth-child(1) { background: #ef4444; }
+        .signal-hot span:nth-child(2) { background: #ef4444; }
+        .signal-hot span:nth-child(3) { background: #ef4444; }
 
         /* Custom scrollbar for an elegant dark theme */
         ::-webkit-scrollbar {
@@ -346,14 +379,11 @@
                         <div class="flex-1 flex flex-col justify-between">
                             <div>
                                 <div class="flex items-start mb-1 gap-2">
-                                    <div class="shrink-0 mt-0.5"
-                                        title="{% if item.temperature == 'hot' %} Quente {% elif item.temperature == 'warm' %} Morna {% else %} Fria {% endif %}">
-                                        <span class="material-symbols-outlined text-[18px]
-                                            {% if item.temperature == 'hot' %} text-red-500 
-                                            {% elif item.temperature == 'warm' %} text-orange-400 
-                                            {% else %} text-blue-400 {% endif %}">
-                                            speed
-                                        </span>
+                                    <div class="shrink-0 mt-1"
+                                        title="{% if item.temperature == 'hot' %}Quente{% elif item.temperature == 'warm' %}Morna{% else %}Fria{% endif %}">
+                                        <div class="signal-bars signal-{% if item.temperature == 'hot' %}hot{% elif item.temperature == 'warm' %}warm{% else %}cold{% endif %}">
+                                            <span></span><span></span><span></span>
+                                        </div>
                                     </div>
                                     <div class="flex-1">
                                         <h3 class="font-mono font-bold dark:text-gray-100 leading-snug group-hover:text-primary transition-colors text-base">

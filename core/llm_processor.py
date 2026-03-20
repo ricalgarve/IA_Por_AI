@@ -107,3 +107,59 @@ def check_semantic_duplicate_with_llm(new_title: str, new_summary: str, existing
         return True
         
     return False
+
+def classify_temperature_with_llm(titles: list[str]) -> list[str]:
+    """
+    Classifica a temperatura de uma lista de notícias com base nos títulos.
+    Retorna uma lista de temperaturas: 'hot', 'warm' ou 'cold'.
+    
+    - HOT: Notícias envolvendo BigTechs (Google, OpenAI, Microsoft, Meta, Apple, Amazon, Nvidia, etc.)
+           ou lançamentos/atualizações importantes de ferramentas de IA (ChatGPT, Gemini, Claude, etc.)
+    - WARM: Notícias sobre ferramentas, produtos ou aplicações de IA em geral
+    - COLD: Outros assuntos relacionados a IA (pesquisas, regulamentação, discussões, etc.)
+    """
+    if not titles or not USE_LLM:
+        return ["cold"] * len(titles)
+    
+    # Monta a lista numerada de títulos
+    numbered_titles = "\n".join([f"{i+1}. {t}" for i, t in enumerate(titles)])
+    
+    system_prompt = (
+        "Você é um classificador de relevância de notícias de tecnologia e IA. "
+        "Sua tarefa é classificar a 'temperatura' (relevância/impacto) de cada notícia com base no título. "
+        "Regras de classificação:\n"
+        "- HOT: Notícias que envolvem BigTechs (Google, OpenAI, Microsoft, Meta, Apple, Amazon, Nvidia, xAI, Anthropic, DeepSeek, etc.) "
+        "ou lançamentos/atualizações importantes de ferramentas de IA conhecidas (ChatGPT, Gemini, Claude, Copilot, Midjourney, Grok, etc.)\n"
+        "- WARM: Notícias sobre ferramentas, produtos, startups ou aplicações práticas de IA\n"
+        "- COLD: Outros assuntos de IA como pesquisas acadêmicas, regulamentação, discussões éticas, opiniões\n\n"
+        "Responda APENAS com os números e classificações, uma por linha, no formato: NUMERO:TEMPERATURA\n"
+        "Exemplo:\n1:HOT\n2:COLD\n3:WARM"
+    )
+    
+    user_prompt = f"Classifique cada notícia abaixo:\n\n{numbered_titles}"
+    
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+    
+    response = call_openrouter(messages)
+    
+    # Parseia a resposta 
+    result = ["cold"] * len(titles)
+    
+    if response and "Desculpe" not in response and "Estou passando" not in response:
+        for line in response.strip().split("\n"):
+            line = line.strip()
+            if ":" in line:
+                parts = line.split(":")
+                try:
+                    idx = int(parts[0].strip()) - 1
+                    temp = parts[1].strip().lower()
+                    if temp in ("hot", "warm", "cold") and 0 <= idx < len(titles):
+                        result[idx] = temp
+                except (ValueError, IndexError):
+                    continue
+    
+    logger.info(f"Temperaturas classificadas pela IA: {list(zip(titles, result))}")
+    return result
