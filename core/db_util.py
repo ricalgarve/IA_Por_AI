@@ -233,6 +233,12 @@ def subscribe_newsletter(email: str) -> bool:
     if not existing.data:
         supabase.table("newsletter").insert({"email": email}).execute()
         return True
+    else:
+        # Se já existe mas estava inativo, reativa
+        row = existing.data[0]
+        if not row.get("ativo", True):
+            supabase.table("newsletter").update({"ativo": True}).eq("email", email).execute()
+            return True
     return False
 
 # Apelidos para funções de load/save padrão para não quebrar locais que já usem
@@ -272,16 +278,33 @@ def get_last_successful_update() -> str | None:
         logging.error(f"Erro ao buscar última atualização: {e}")
         return None
 
-def get_subscribers() -> list[str]:
+def get_subscribers() -> list[dict]:
+    """Retorna assinantes ativos com email e user_token"""
     supabase = get_supabase()
     if not supabase:
         return []
     try:
-        response = supabase.table("newsletter").select("email").execute()
-        return [row["email"] for row in response.data]
+        response = supabase.table("newsletter").select("email, user_token").eq("ativo", True).execute()
+        return [{"email": row["email"], "user_token": row["user_token"]} for row in response.data]
     except Exception as e:
         logging.error(f"Erro ao buscar assinantes: {e}")
         return []
+
+def unsubscribe_by_token(token: str) -> bool:
+    """Desativa o assinante pelo user_token"""
+    supabase = get_supabase()
+    if not supabase:
+        return False
+    try:
+        existing = supabase.table("newsletter").select("*").eq("user_token", token).execute()
+        if not existing.data:
+            return False
+        
+        supabase.table("newsletter").update({"ativo": False}).eq("user_token", token).execute()
+        return True
+    except Exception as e:
+        logging.error(f"Erro ao cancelar inscrição pelo token: {e}")
+        return False
 
 def get_yesterdays_news() -> list[dict]:
     supabase = get_supabase()

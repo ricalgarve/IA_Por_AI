@@ -217,6 +217,34 @@ async def send_newsletter_cron(api_key: str = Depends(verify_cron_secret)):
         print(f"ERRO CRÍTICO no envio de Newsletter:\n{error_trace}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/newsletter/cancelar", response_class=HTMLResponse)
+async def unsubscribe_page(request: Request, token: Optional[str] = None):
+    """Página para o usuário confirmar o cancelamento da newsletter"""
+    return templates.TemplateResponse("unsubscribe.html", {
+        "request": request,
+        "token": token or ""
+    })
+
+@app.post("/api/newsletter/unsubscribe")
+async def api_unsubscribe_newsletter(request: Request):
+    """Cancela a inscrição do usuário na newsletter pelo token"""
+    try:
+        body = await request.json()
+        token = body.get("token", "")
+        if not token:
+            raise HTTPException(status_code=400, detail="Token não fornecido.")
+        
+        from core.db_util import unsubscribe_by_token
+        success = unsubscribe_by_token(token)
+        if success:
+            return {"status": "success", "message": "Sua inscrição foi cancelada com sucesso. Você não receberá mais e-mails."}
+        else:
+            return {"status": "error", "message": "Token inválido ou inscrição já cancelada."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 class LogInteraction(BaseModel):
     id_noticia: Optional[int] = None
     acao: str

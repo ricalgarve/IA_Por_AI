@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cancelar Newsletter - IA por AI</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1973f0",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full mx-4">
+        <!-- Card de cancelamento -->
+        <div id="unsubscribe-card" class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-3xl p-8 text-center shadow-lg">
+            <!-- Logo -->
+            <div class="flex items-center justify-center gap-3 mb-6">
+                <div class="text-primary size-8">
+                    <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight dark:text-white uppercase italic">IA por AI</h1>
+            </div>
+
+            <!-- Estado: Confirmação -->
+            <div id="state-confirm">
+                <div class="mb-6">
+                    <span class="material-symbols-outlined text-5xl text-orange-400 mb-4 block">unsubscribe</span>
+                    <h2 class="text-xl font-bold dark:text-gray-100 mb-2">Cancelar Newsletter</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        Tem certeza de que deseja cancelar o recebimento da nossa newsletter?
+                        Você deixará de receber as notícias diárias sobre Inteligência Artificial.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button onclick="confirmUnsubscribe()" id="btn-cancel"
+                        class="bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl px-6 py-3 transition-colors text-sm shadow-md flex items-center justify-center gap-2 w-full disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span class="material-symbols-outlined text-[18px]">cancel</span>
+                        Sim, quero cancelar
+                    </button>
+                    <a href="/"
+                        class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-xl px-6 py-3 transition-colors text-sm flex items-center justify-center gap-2 w-full">
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                        Não, quero continuar recebendo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Estado: Sucesso -->
+            <div id="state-success" class="hidden">
+                <div class="mb-6">
+                    <span class="material-symbols-outlined text-5xl text-green-400 mb-4 block">check_circle</span>
+                    <h2 class="text-xl font-bold dark:text-gray-100 mb-2">Inscrição Cancelada</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        Sua inscrição foi cancelada com sucesso. Você não receberá mais e-mails da nossa newsletter.
+                    </p>
+                    <p class="text-slate-400 dark:text-slate-500 text-xs mt-3">
+                        Caso mude de ideia, basta se inscrever novamente na página principal.
+                    </p>
+                </div>
+                <a href="/"
+                    class="bg-primary hover:bg-blue-600 text-white font-medium rounded-xl px-6 py-3 transition-colors text-sm shadow-md flex items-center justify-center gap-2 w-full">
+                    <span class="material-symbols-outlined text-[18px]">home</span>
+                    Voltar para a página inicial
+                </a>
+            </div>
+
+            <!-- Estado: Erro -->
+            <div id="state-error" class="hidden">
+                <div class="mb-6">
+                    <span class="material-symbols-outlined text-5xl text-red-400 mb-4 block">error</span>
+                    <h2 class="text-xl font-bold dark:text-gray-100 mb-2">Erro ao Cancelar</h2>
+                    <p id="error-message" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        Não foi possível cancelar a inscrição. O link pode ser inválido ou já ter sido utilizado.
+                    </p>
+                </div>
+                <a href="/"
+                    class="bg-primary hover:bg-blue-600 text-white font-medium rounded-xl px-6 py-3 transition-colors text-sm shadow-md flex items-center justify-center gap-2 w-full">
+                    <span class="material-symbols-outlined text-[18px]">home</span>
+                    Voltar para a página inicial
+                </a>
+            </div>
+
+            <!-- Estado: Token inválido -->
+            <div id="state-no-token" class="hidden">
+                <div class="mb-6">
+                    <span class="material-symbols-outlined text-5xl text-yellow-400 mb-4 block">warning</span>
+                    <h2 class="text-xl font-bold dark:text-gray-100 mb-2">Link Inválido</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        Este link de cancelamento é inválido. Verifique se copiou o link corretamente do e-mail.
+                    </p>
+                </div>
+                <a href="/"
+                    class="bg-primary hover:bg-blue-600 text-white font-medium rounded-xl px-6 py-3 transition-colors text-sm shadow-md flex items-center justify-center gap-2 w-full">
+                    <span class="material-symbols-outlined text-[18px]">home</span>
+                    Voltar para a página inicial
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <p class="text-center text-slate-500 text-xs mt-6">© 2050 IA por AI. Todos os direitos reservados.</p>
+    </div>
+
+    <script>
+        const TOKEN = "{{ token }}";
+
+        // Se não tem token, mostra estado de link inválido
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!TOKEN) {
+                document.getElementById('state-confirm').classList.add('hidden');
+                document.getElementById('state-no-token').classList.remove('hidden');
+            }
+        });
+
+        async function confirmUnsubscribe() {
+            const btn = document.getElementById('btn-cancel');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">sync</span> Processando...';
+
+            try {
+                const response = await fetch('/api/newsletter/unsubscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: TOKEN })
+                });
+                const data = await response.json();
+
+                document.getElementById('state-confirm').classList.add('hidden');
+
+                if (data.status === 'success') {
+                    document.getElementById('state-success').classList.remove('hidden');
+                } else {
+                    document.getElementById('error-message').textContent = data.message || 'Erro desconhecido.';
+                    document.getElementById('state-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                document.getElementById('state-confirm').classList.add('hidden');
+                document.getElementById('state-error').classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+    </script>
+</body>
+
+</html>
