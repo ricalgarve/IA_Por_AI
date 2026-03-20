@@ -56,21 +56,28 @@ async def home(request: Request, date: Optional[str] = None):
     for item in db_news:
         pub_str = item.get("published", "")
         extracted_date_str = None
+        formatted_date = None
         if pub_str:
             try:
                 # Extraindo o objeto data do string RFC ou qualquer que for o RSS
                 dt = date_parse(pub_str)
                 extracted_date_str = dt.strftime("%Y-%m-%d")
+                formatted_date = dt.strftime("%d/%m/%Y %H:%M")
             except Exception as e:
                 logging.warning(f"Erro ao parsear data '{pub_str}': {e}")
                 # Se não conseguir extrair data, usa a data de hoje
-                extracted_date_str = datetime.now().strftime("%Y-%m-%d")
+                now = datetime.now()
+                extracted_date_str = now.strftime("%Y-%m-%d")
+                formatted_date = now.strftime("%d/%m/%Y %H:%M")
         else:
             # Se não tem data publicada, usa a de hoje
-            extracted_date_str = datetime.now().strftime("%Y-%m-%d")
+            now = datetime.now()
+            extracted_date_str = now.strftime("%Y-%m-%d")
+            formatted_date = now.strftime("%d/%m/%Y %H:%M")
         
         # Guardaremos a string no próprio objeto pelo menos pra facilitar a UI
         item["extracted_date"] = extracted_date_str
+        item["formatted_date"] = formatted_date
         parsed_news.append(item)
     
     # Todas as notícias carregadas são da data selecionada
@@ -91,7 +98,6 @@ async def home(request: Request, date: Optional[str] = None):
         from core.db_util import get_last_successful_update
         last_update_raw = get_last_successful_update()
         if last_update_raw:
-            from dateutil.parser import parse as date_parse
             from datetime import timedelta
             dt_update = date_parse(last_update_raw)
             # Ajusta para UTC-3 (Brazil)

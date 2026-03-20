@@ -113,6 +113,19 @@
             return `https://translate.google.com/translate?sl=auto&tl=pt&u=${encodeURIComponent(url)}`;
         }
 
+        function formatDateBR(isoStr) {
+            try {
+                const dt = new Date(isoStr);
+                if (isNaN(dt)) return isoStr;
+                const day = String(dt.getDate()).padStart(2, '0');
+                const month = String(dt.getMonth() + 1).padStart(2, '0');
+                const year = dt.getFullYear();
+                const hours = String(dt.getHours()).padStart(2, '0');
+                const minutes = String(dt.getMinutes()).padStart(2, '0');
+                return `${day}/${month}/${year} ${hours}:${minutes}`;
+            } catch (e) { return isoStr; }
+        }
+
         function renderNews(news, dateStr) {
             const newsList = document.getElementById('news-list');
             
@@ -132,7 +145,7 @@
             news.forEach(item => {
                 const tempClass = item.temperature === 'hot' ? 'text-red-500' : 
                                 item.temperature === 'warm' ? 'text-orange-400' : 'text-blue-400';
-                const publishedTime = item.published ? item.published.substring(0, 16) : '';
+                const publishedTime = item.published ? formatDateBR(item.published) : '';
                 
                 html += `
                     <div class="group border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all duration-300 bg-transparent py-4 border-b cursor-pointer relative"
@@ -339,7 +352,7 @@
                                     <div class="flex-1">
                                         <h3 class="font-mono font-bold dark:text-gray-100 leading-snug group-hover:text-primary transition-colors text-base">
                                             {{ item.title }}</h3>
-                                        {% if item.published %}<p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">schedule</span>{{ item.published[:16] }}</p>{% endif %}
+                                        {% if item.formatted_date %}<p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">schedule</span>{{ item.formatted_date }}</p>{% endif %}
                                     </div>
                                 </div>
                                 <p id="desc-{{ item.id }}"
@@ -353,7 +366,7 @@
                                 class="hidden items-center justify-between mt-3 mb-2 pt-3 border-t border-slate-100 dark:border-slate-800/50">
                                 <span class="text-[10px] md:text-xs text-slate-500 flex items-center flex-wrap gap-2"><span
                                         class="material-symbols-outlined text-[14px]">public</span> Fonte: {{
-                                    item.source }}{% if item.published %}<span class="material-symbols-outlined text-[14px]">schedule</span>{{ item.published[:16] }}{% endif %}</span>
+                                    item.source }}{% if item.formatted_date %}<span class="material-symbols-outlined text-[14px]">schedule</span>{{ item.formatted_date }}{% endif %}</span>
                                 <div class="flex items-center gap-3">
                                     {% if item.source in ['TechCrunch', 'Ars Technica', 'Business Insider', 'The Guardian AI', 'Fortune', 'The Decoder', 'Bloomberg Tech'] %}
                                     <a href="https://translate.google.com/translate?sl=auto&tl=pt&u={{ item.url }}" target="_blank" onclick="event.stopPropagation(); sendLog('acessar_noticia_traduzida', {{ item.id }});"
